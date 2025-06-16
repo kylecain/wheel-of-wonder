@@ -6,6 +6,7 @@ import (
 
 	"github.com/bwmarrin/discordgo"
 	"github.com/kylecain/wheel-of-wonder/internal/db/repository"
+	"github.com/kylecain/wheel-of-wonder/internal/model"
 )
 
 type AddMovieCommand struct {
@@ -36,7 +37,14 @@ func (c *AddMovieCommand) Definition() *discordgo.ApplicationCommand {
 func (h *AddMovieCommand) Handle(s *discordgo.Session, i *discordgo.InteractionCreate) {
 	input := i.ApplicationCommandData().Options[0].StringValue()
 
-	h.MovieRepository.Create(input)
+	movie := &model.Movie{
+		GuildID:  i.GuildID,
+		UserID:   i.Member.User.ID,
+		Username: i.Member.User.Username,
+		Title:    input,
+	}
+
+	h.MovieRepository.Create(movie)
 
 	response := fmt.Sprintf("You added: %s", input)
 	err := s.InteractionRespond(i.Interaction, &discordgo.InteractionResponse{

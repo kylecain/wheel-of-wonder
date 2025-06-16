@@ -3,6 +3,8 @@ package repository
 import (
 	"database/sql"
 	"log/slog"
+
+	"github.com/kylecain/wheel-of-wonder/internal/model"
 )
 
 type MovieRepository struct {
@@ -15,9 +17,9 @@ func NewMovieRepository(db *sql.DB) *MovieRepository {
 	}
 }
 
-func (r *MovieRepository) Create(movie string) (int64, error) {
-	query := " INSERT INTO movies (name) VALUES (?)"
-	result, err := r.db.Exec(query, movie)
+func (r *MovieRepository) Create(movie *model.Movie) (int64, error) {
+	query := " INSERT INTO movies (guild_id, user_id, username, title) VALUES (?, ?, ?, ?)"
+	result, err := r.db.Exec(query, movie.GuildID, movie.UserID, movie.Username, movie.Title)
 
 	if err != nil {
 		slog.Error("failed to insert movie", "error", err, "name", movie)
@@ -25,23 +27,32 @@ func (r *MovieRepository) Create(movie string) (int64, error) {
 	}
 
 	id, _ := result.LastInsertId()
-	slog.Info("created movie", "id", id, "name", movie)
+	slog.Info("created movie", "id", id, "title", movie.Title, "user", movie.Username)
 	return id, nil
 }
 
-func (r *MovieRepository) GetAll() ([]string, error) {
-	query := "SELECT name FROM movies"
-	rows, err := r.db.Query(query)
+func (r *MovieRepository) GetAll(guildID string) ([]model.Movie, error) {
+	query := "SELECT id, guild_id, user_id, username, title, created_at, updated_at FROM movies WHERE guild_id = ?"
+	rows, err := r.db.Query(query, guildID)
 	if err != nil {
 		slog.Error("failed to query movies", "error", err)
 		return nil, err
 	}
 	defer rows.Close()
 
-	var movies []string
+	var movies []model.Movie
 	for rows.Next() {
-		var movie string
-		if err := rows.Scan(&movie); err != nil {
+		var movie model.Movie
+
+		if err := rows.Scan(
+			&movie.ID,
+			&movie.GuildID,
+			&movie.UserID,
+			&movie.Username,
+			&movie.Title,
+			&movie.CreatedAt,
+			&movie.UpdatedAt,
+		); err != nil {
 			slog.Error("failed to scan movie", "error", err)
 			return nil, err
 		}

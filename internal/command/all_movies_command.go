@@ -26,7 +26,7 @@ func (c *AllMoviesCommand) Definition() *discordgo.ApplicationCommand {
 }
 
 func (h *AllMoviesCommand) Handle(s *discordgo.Session, i *discordgo.InteractionCreate) {
-	movies, err := h.MovieRepository.GetAll()
+	movies, err := h.MovieRepository.GetAll(i.GuildID)
 	if err != nil {
 		slog.Error("failed to get all movies", "error", err)
 		return
@@ -34,7 +34,7 @@ func (h *AllMoviesCommand) Handle(s *discordgo.Session, i *discordgo.Interaction
 
 	response := "Movies in the wheel:\n"
 	for _, movie := range movies {
-		response += fmt.Sprintf("- %s\n", movie)
+		response += fmt.Sprintf("- %s\n", movie.Title)
 	}
 
 	err = s.InteractionRespond(i.Interaction, &discordgo.InteractionResponse{

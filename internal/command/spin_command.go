@@ -27,7 +27,7 @@ func (c *SpinCommand) Definition() *discordgo.ApplicationCommand {
 }
 
 func (h *SpinCommand) Handle(s *discordgo.Session, i *discordgo.InteractionCreate) {
-	movies, err := h.MovieRepository.GetAll()
+	movies, err := h.MovieRepository.GetAll(i.GuildID)
 	if err != nil {
 		slog.Error("failed to get all movies for spin", "error", err)
 		return
@@ -48,7 +48,7 @@ func (h *SpinCommand) Handle(s *discordgo.Session, i *discordgo.InteractionCreat
 	}
 
 	selectedMovie := movies[rand.Intn(len(movies))]
-	response := fmt.Sprintf("You spun the wheel and got: %s", selectedMovie)
+	response := fmt.Sprintf("You spun the wheel and got: %s", selectedMovie.Title)
 
 	err = s.InteractionRespond(i.Interaction, &discordgo.InteractionResponse{
 		Type: discordgo.InteractionResponseChannelMessageWithSource,
