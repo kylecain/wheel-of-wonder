@@ -12,6 +12,7 @@ import (
 
 type Bot struct {
 	Session *discordgo.Session
+	Config  *config.Config
 	DB      *sql.DB
 }
 
@@ -22,6 +23,7 @@ func NewBot(config *config.Config, db *sql.DB) (*Bot, error) {
 	}
 	return &Bot{
 		Session: dg,
+		Config:  config,
 		DB:      db,
 	}, nil
 }
@@ -33,8 +35,18 @@ func (b *Bot) Start() error {
 	}
 
 	movieRepository := repository.NewMovieRepository(b.DB)
+
 	b.Session.AddHandler(handler.NewMovieHandler(movieRepository).Add)
-	_, err = b.Session.ApplicationCommandCreate(b.Session.State.User.ID, "", command.NewMovieCommand().Add())
+	b.Session.AddHandler(handler.NewMovieHandler(movieRepository).GetAll)
+
+	_, err = b.Session.ApplicationCommandCreate(b.Session.State.User.ID, b.Config.GuildId, command.NewMovieCommand().Add())
+	if err != nil {
+		return err
+	}
+	_, err = b.Session.ApplicationCommandCreate(b.Session.State.User.ID, b.Config.GuildId, command.NewMovieCommand().GetAll())
+	if err != nil {
+		return err
+	}
 
 	return nil
 }

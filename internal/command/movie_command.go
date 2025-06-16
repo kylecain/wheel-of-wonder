@@ -10,7 +10,7 @@ func NewMovieCommand() *MovieCommand {
 
 func (c *MovieCommand) Add() *discordgo.ApplicationCommand {
 	return &discordgo.ApplicationCommand{
-		Name:        "add",
+		Name:        "addmovie",
 		Description: "Add a movie",
 		Options: []*discordgo.ApplicationCommandOption{
 			{
@@ -20,5 +20,12 @@ func (c *MovieCommand) Add() *discordgo.ApplicationCommand {
 				Required:    true,
 			},
 		},
+	}
+}
+
+func (c *MovieCommand) GetAll() *discordgo.ApplicationCommand {
+	return &discordgo.ApplicationCommand{
+		Name:        "allmovies",
+		Description: "Get all movies in the wheel",
 	}
 }
