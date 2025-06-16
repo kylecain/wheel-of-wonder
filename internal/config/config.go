@@ -8,7 +8,9 @@ import (
 )
 
 type Config struct {
-	BotToken string
+	BotToken     string
+	MigrationUrl string
+	DatabaseUrl  string
 }
 
 func NewConfig() *Config {
@@ -19,12 +21,12 @@ func NewConfig() *Config {
 	}
 
 	botToken := os.Getenv("BOT_TOKEN")
-	if botToken == "" {
-		slog.Error("BOT_TOKEN is required")
-		os.Exit(1)
-	}
+	migationUrl := os.Getenv("MIGRATION_URL")
+	databaseUrl := os.Getenv("DATABASE_URL")
 
 	return &Config{
-		BotToken: botToken,
+		BotToken:     botToken,
+		MigrationUrl: migationUrl,
+		DatabaseUrl:  databaseUrl,
 	}
 }

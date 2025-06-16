@@ -9,11 +9,13 @@ import (
 
 	"github.com/kylecain/wheel-of-wonder/internal/bot"
 	"github.com/kylecain/wheel-of-wonder/internal/config"
+	"github.com/kylecain/wheel-of-wonder/internal/db"
 )
 
 func main() {
 	config := config.NewConfig()
-	bot, err := bot.NewBot(config)
+	db := db.NewDatabase(config)
+	bot, err := bot.NewBot(config, db)
 	if err != nil {
 		slog.Error("error creating bot", "error", err)
 		os.Exit(1)
