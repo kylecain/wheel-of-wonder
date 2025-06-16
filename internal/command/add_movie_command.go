@@ -1,0 +1,51 @@
+package command
+
+import (
+	"fmt"
+	"log/slog"
+
+	"github.com/bwmarrin/discordgo"
+	"github.com/kylecain/wheel-of-wonder/internal/db/repository"
+)
+
+type AddMovieCommand struct {
+	MovieRepository *repository.MovieRepository
+}
+
+func NewAddMovieCommand(movieRepository *repository.MovieRepository) *AddMovieCommand {
+	return &AddMovieCommand{
+		MovieRepository: movieRepository,
+	}
+}
+
+func (c *AddMovieCommand) Definition() *discordgo.ApplicationCommand {
+	return &discordgo.ApplicationCommand{
+		Name:        "addmovie",
+		Description: "Add a movie",
+		Options: []*discordgo.ApplicationCommandOption{
+			{
+				Type:        discordgo.ApplicationCommandOptionString,
+				Name:        "movie",
+				Description: "movie that will be added to the wheel",
+				Required:    true,
+			},
+		},
+	}
+}
+
+func (h *AddMovieCommand) Handle(s *discordgo.Session, i *discordgo.InteractionCreate) {
+	input := i.ApplicationCommandData().Options[0].StringValue()
+
+	h.MovieRepository.Create(input)
+
+	response := fmt.Sprintf("You added: %s", input)
+	err := s.InteractionRespond(i.Interaction, &discordgo.InteractionResponse{
+		Type: discordgo.InteractionResponseChannelMessageWithSource,
+		Data: &discordgo.InteractionResponseData{
+			Content: response,
+		},
+	})
+	if err != nil {
+		slog.Error("failed to respond to add command", "error", err)
+	}
+}

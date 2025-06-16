@@ -23,7 +23,6 @@ func NewConfig() *Config {
 
 	botToken := os.Getenv("BOT_TOKEN")
 	guildId := os.Getenv("GUILD_ID")
-	slog.Info("loaded guild ID", "guild_id", guildId)
 	migationUrl := os.Getenv("MIGRATION_URL")
 	databaseUrl := os.Getenv("DATABASE_URL")
 

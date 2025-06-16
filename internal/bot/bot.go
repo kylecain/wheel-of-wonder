@@ -7,7 +7,6 @@ import (
 	"github.com/kylecain/wheel-of-wonder/internal/command"
 	"github.com/kylecain/wheel-of-wonder/internal/config"
 	"github.com/kylecain/wheel-of-wonder/internal/db/repository"
-	"github.com/kylecain/wheel-of-wonder/internal/handler"
 )
 
 type Bot struct {
@@ -36,17 +35,7 @@ func (b *Bot) Start() error {
 
 	movieRepository := repository.NewMovieRepository(b.DB)
 
-	b.Session.AddHandler(handler.NewMovieHandler(movieRepository).Add)
-	b.Session.AddHandler(handler.NewMovieHandler(movieRepository).GetAll)
-
-	_, err = b.Session.ApplicationCommandCreate(b.Session.State.User.ID, b.Config.GuildId, command.NewMovieCommand().Add())
-	if err != nil {
-		return err
-	}
-	_, err = b.Session.ApplicationCommandCreate(b.Session.State.User.ID, b.Config.GuildId, command.NewMovieCommand().GetAll())
-	if err != nil {
-		return err
-	}
+	command.RegisterAll(b.Session, b.Config, movieRepository)
 
 	return nil
 }
