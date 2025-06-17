@@ -1,6 +1,8 @@
 package command
 
 import (
+	"strings"
+
 	"github.com/bwmarrin/discordgo"
 	"github.com/kylecain/wheel-of-wonder/internal/config"
 	"github.com/kylecain/wheel-of-wonder/internal/db/repository"
@@ -43,8 +45,14 @@ func RegisterAll(s *discordgo.Session, config *config.Config, repository *reposi
 				handler.HandleCommand(s, i)
 			}
 		case discordgo.InteractionMessageComponent:
-			customID := i.MessageComponentData().CustomID
-			if handler, ok := components[customID]; ok {
+			customId := i.MessageComponentData().CustomID
+			key := strings.Split(customId, ":")[0]
+
+			if len(key) == 0 {
+				return
+			}
+
+			if handler, ok := components[key]; ok {
 				handler(s, i)
 			}
 		}

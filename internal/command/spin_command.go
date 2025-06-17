@@ -1,9 +1,12 @@
 package command
 
 import (
+	"database/sql"
 	"fmt"
 	"log/slog"
 	"math/rand"
+	"strconv"
+	"strings"
 
 	"github.com/bwmarrin/discordgo"
 	"github.com/kylecain/wheel-of-wonder/internal/db/repository"
@@ -19,9 +22,14 @@ func NewSpinCommand(movieRepository *repository.MovieRepository) *SpinCommand {
 	}
 }
 
+var (
+	commandName            = "spin"
+	setActiveMovieCustomID = "set_active_movie"
+)
+
 func (c *SpinCommand) Definition() *discordgo.ApplicationCommand {
 	return &discordgo.ApplicationCommand{
-		Name:        "spin",
+		Name:        commandName,
 		Description: "Spin the wheel and get a random movie",
 	}
 }
@@ -54,8 +62,20 @@ func (c *SpinCommand) HandleCommand(s *discordgo.Session, i *discordgo.Interacti
 		Type: discordgo.InteractionResponseChannelMessageWithSource,
 		Data: &discordgo.InteractionResponseData{
 			Content: response,
+			Components: []discordgo.MessageComponent{
+				discordgo.ActionsRow{
+					Components: []discordgo.MessageComponent{
+						discordgo.Button{
+							Style:    discordgo.PrimaryButton,
+							Label:    "Set as Active",
+							CustomID: setActiveMovieCustomID + ":" + fmt.Sprint(selectedMovie.ID),
+						},
+					},
+				},
+			},
 		},
 	})
+
 	if err != nil {
 		slog.Error("failed to respond to spin command", "error", err)
 	}
@@ -63,9 +83,44 @@ func (c *SpinCommand) HandleCommand(s *discordgo.Session, i *discordgo.Interacti
 
 func (c *AddMovieCommand) ComponentHandlers() map[string]func(*discordgo.Session, *discordgo.InteractionCreate) {
 	return map[string]func(*discordgo.Session, *discordgo.InteractionCreate){
-		"set_active_movie": c.setActiveMovieHandler,
+		setActiveMovieCustomID: c.setActiveMovieHandler,
 	}
 }
 
 func (c *AddMovieCommand) setActiveMovieHandler(s *discordgo.Session, i *discordgo.InteractionCreate) {
+	value := strings.Split(i.MessageComponentData().CustomID, ":")[1]
+
+	movieID, err := strconv.Atoi(value)
+	if err != nil {
+		slog.Error("failed to convert movieID to int", "error", err)
+		return
+	}
+
+	currentlyActiveMovie, err := c.MovieRepository.GetActive(i.GuildID)
+	if err != nil {
+		if err != sql.ErrNoRows {
+			slog.Error("failed to get currently active movie", "error", err)
+			return
+		}
+	}
+
+	err = c.MovieRepository.UpdateActive(currentlyActiveMovie.ID, false)
+	if err != nil {
+		slog.Error("failed to update currently active movie", "error", err, "movieID", currentlyActiveMovie.ID)
+		return
+	}
+
+	err = c.MovieRepository.UpdateActive(movieID, true)
+	if err != nil {
+		slog.Error("failed to update currently active movie", "error", err, "movieID", movieID)
+		return
+	}
+
+	_ = s.InteractionRespond(i.Interaction, &discordgo.InteractionResponse{
+		Type: discordgo.InteractionResponseChannelMessageWithSource,
+		Data: &discordgo.InteractionResponseData{
+			Content: "You set the movie with ID " + strconv.Itoa(movieID) + " as active.",
+			Flags:   discordgo.MessageFlagsEphemeral,
+		},
+	})
 }
