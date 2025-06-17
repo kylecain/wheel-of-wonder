@@ -21,7 +21,7 @@ func NewSetActiveCommand(movieRepository *repository.MovieRepository) *SetActive
 
 func (c *SetActiveCommand) Definition() *discordgo.ApplicationCommand {
 	return &discordgo.ApplicationCommand{
-		Name:        "setactive",
+		Name:        commandNameSetActive,
 		Description: "Set a movie as active by ID",
 		Options: []*discordgo.ApplicationCommandOption{
 			{
@@ -38,25 +38,28 @@ func (c *SetActiveCommand) HandleCommand(s *discordgo.Session, i *discordgo.Inte
 	input := i.ApplicationCommandData().Options[0].StringValue()
 	movieID, err := strconv.Atoi(input)
 	if err != nil {
-		response := fmt.Sprintf("Invalid movie ID: %s", input)
 		s.InteractionRespond(i.Interaction, &discordgo.InteractionResponse{
 			Type: discordgo.InteractionResponseChannelMessageWithSource,
 			Data: &discordgo.InteractionResponseData{
-				Content: response,
+				Content: fmt.Sprintf("Invalid movie ID: %s", input),
 			},
 		})
 		return
 	}
 
-	c.MovieRepository.UpdateActive(movieID, true)
+	err = c.MovieRepository.UpdateActive(movieID, true)
+	if err != nil {
+		slog.Error("failed to update active movie", "error", err)
+		return
+	}
 
-	response := fmt.Sprintf("You set %s as active", input)
 	err = s.InteractionRespond(i.Interaction, &discordgo.InteractionResponse{
 		Type: discordgo.InteractionResponseChannelMessageWithSource,
 		Data: &discordgo.InteractionResponseData{
-			Content: response,
+			Content: fmt.Sprintf("You set %s as active", input),
 		},
 	})
+
 	if err != nil {
 		slog.Error("failed to respond to add command", "error", err)
 	}

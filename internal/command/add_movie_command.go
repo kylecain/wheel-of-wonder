@@ -21,7 +21,7 @@ func NewAddMovieCommand(movieRepository *repository.MovieRepository) *AddMovieCo
 
 func (c *AddMovieCommand) Definition() *discordgo.ApplicationCommand {
 	return &discordgo.ApplicationCommand{
-		Name:        "addmovie",
+		Name:        commandNameAddMovie,
 		Description: "Add a movie",
 		Options: []*discordgo.ApplicationCommandOption{
 			{
@@ -44,10 +44,14 @@ func (c *AddMovieCommand) HandleCommand(s *discordgo.Session, i *discordgo.Inter
 		Title:    input,
 	}
 
-	c.MovieRepository.Create(movie)
+	_, err := c.MovieRepository.Create(movie)
+	if err != nil {
+		slog.Error("failed to add movie", "error", err)
+		return
+	}
 
 	response := fmt.Sprintf("You added: %s", input)
-	err := s.InteractionRespond(i.Interaction, &discordgo.InteractionResponse{
+	err = s.InteractionRespond(i.Interaction, &discordgo.InteractionResponse{
 		Type: discordgo.InteractionResponseChannelMessageWithSource,
 		Data: &discordgo.InteractionResponseData{
 			Content: response,

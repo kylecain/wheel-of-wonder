@@ -21,7 +21,7 @@ func NewSetWatchedCommand(movieRepository *repository.MovieRepository) *SetWatch
 
 func (c *SetWatchedCommand) Definition() *discordgo.ApplicationCommand {
 	return &discordgo.ApplicationCommand{
-		Name:        "setwatched",
+		Name:        commandNameSetWatched,
 		Description: "Set a movie as watched by ID",
 		Options: []*discordgo.ApplicationCommandOption{
 			{
@@ -48,7 +48,11 @@ func (c *SetWatchedCommand) HandleCommand(s *discordgo.Session, i *discordgo.Int
 		return
 	}
 
-	c.MovieRepository.UpdateWatched(movieID, true)
+	err = c.MovieRepository.UpdateWatched(movieID, true)
+	if err != nil {
+		slog.Error("failed to update watched movie", "error", err)
+		return
+	}
 
 	response := fmt.Sprintf("You set %s as watched", input)
 	err = s.InteractionRespond(i.Interaction, &discordgo.InteractionResponse{

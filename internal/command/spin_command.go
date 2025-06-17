@@ -22,14 +22,9 @@ func NewSpinCommand(movieRepository *repository.MovieRepository) *SpinCommand {
 	}
 }
 
-var (
-	commandName            = "spin"
-	setActiveMovieCustomID = "set_active_movie"
-)
-
 func (c *SpinCommand) Definition() *discordgo.ApplicationCommand {
 	return &discordgo.ApplicationCommand{
-		Name:        commandName,
+		Name:        commandNameSpin,
 		Description: "Spin the wheel and get a random movie",
 	}
 }
@@ -42,11 +37,10 @@ func (c *SpinCommand) HandleCommand(s *discordgo.Session, i *discordgo.Interacti
 	}
 
 	if len(movies) == 0 {
-		response := "No movies available to spin."
 		err = s.InteractionRespond(i.Interaction, &discordgo.InteractionResponse{
 			Type: discordgo.InteractionResponseChannelMessageWithSource,
 			Data: &discordgo.InteractionResponseData{
-				Content: response,
+				Content: "No movies available to spin.",
 			},
 		})
 		if err != nil {
@@ -56,19 +50,17 @@ func (c *SpinCommand) HandleCommand(s *discordgo.Session, i *discordgo.Interacti
 	}
 
 	selectedMovie := movies[rand.Intn(len(movies))]
-	response := fmt.Sprintf("You spun the wheel and got: %s", selectedMovie.Title)
-
 	err = s.InteractionRespond(i.Interaction, &discordgo.InteractionResponse{
 		Type: discordgo.InteractionResponseChannelMessageWithSource,
 		Data: &discordgo.InteractionResponseData{
-			Content: response,
+			Content: fmt.Sprintf("You spun the wheel and got: %s", selectedMovie.Title),
 			Components: []discordgo.MessageComponent{
 				discordgo.ActionsRow{
 					Components: []discordgo.MessageComponent{
 						discordgo.Button{
 							Style:    discordgo.PrimaryButton,
 							Label:    "Set as Active",
-							CustomID: setActiveMovieCustomID + ":" + fmt.Sprint(selectedMovie.ID),
+							CustomID: fmt.Sprintf("%s:%d", customIdSetActiveMovie, selectedMovie.ID),
 						},
 					},
 				},
@@ -83,7 +75,7 @@ func (c *SpinCommand) HandleCommand(s *discordgo.Session, i *discordgo.Interacti
 
 func (c *AddMovieCommand) ComponentHandlers() map[string]func(*discordgo.Session, *discordgo.InteractionCreate) {
 	return map[string]func(*discordgo.Session, *discordgo.InteractionCreate){
-		setActiveMovieCustomID: c.setActiveMovieHandler,
+		customIdSetActiveMovie: c.setActiveMovieHandler,
 	}
 }
 
@@ -119,7 +111,7 @@ func (c *AddMovieCommand) setActiveMovieHandler(s *discordgo.Session, i *discord
 	_ = s.InteractionRespond(i.Interaction, &discordgo.InteractionResponse{
 		Type: discordgo.InteractionResponseChannelMessageWithSource,
 		Data: &discordgo.InteractionResponseData{
-			Content: "You set the movie with ID " + strconv.Itoa(movieID) + " as active.",
+			Content: fmt.Sprintf("You set the movie with ID %d as active.", movieID),
 			Flags:   discordgo.MessageFlagsEphemeral,
 		},
 	})

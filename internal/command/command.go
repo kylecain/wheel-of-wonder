@@ -21,11 +21,12 @@ var commands = map[string]Command{}
 var components = map[string]func(s *discordgo.Session, i *discordgo.InteractionCreate){}
 
 func RegisterAll(s *discordgo.Session, config *config.Config, repository *repository.MovieRepository) {
-	commands["addmovie"] = NewAddMovieCommand(repository)
-	commands["allmovies"] = NewAllMoviesCommand(repository)
-	commands["spin"] = NewSpinCommand(repository)
-	commands["activemovie"] = NewActiveMovieCommand(repository)
-	commands["setwatched"] = NewSetWatchedCommand(repository)
+	commands[commandNameAddMovie] = NewAddMovieCommand(repository)
+	commands[commandNameAllMovies] = NewAllMoviesCommand(repository)
+	commands[commandNameSpin] = NewSpinCommand(repository)
+	commands[commandNameActiveMovie] = NewActiveMovieCommand(repository)
+	commands[commandNameSetActive] = NewSetWatchedCommand(repository)
+	commands[commandNameSetWatched] = NewSetWatchedCommand(repository)
 
 	for _, cmd := range commands {
 		s.ApplicationCommandCreate(s.State.User.ID, config.GuildId, cmd.Definition())

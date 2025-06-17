@@ -20,7 +20,7 @@ func NewAllMoviesCommand(movieRepository *repository.MovieRepository) *AllMovies
 
 func (c *AllMoviesCommand) Definition() *discordgo.ApplicationCommand {
 	return &discordgo.ApplicationCommand{
-		Name:        "allmovies",
+		Name:        commandNameAllMovies,
 		Description: "Get all movies in the wheel",
 	}
 }
