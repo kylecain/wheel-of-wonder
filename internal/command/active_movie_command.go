@@ -21,7 +21,7 @@ func NewActiveMovieCommand(movieRepository *repository.MovieRepository) *ActiveM
 func (c *ActiveMovieCommand) Definition() *discordgo.ApplicationCommand {
 	return &discordgo.ApplicationCommand{
 		Name:        "activemovie",
-		Description: "show the active movie",
+		Description: "Show the active movie",
 	}
 }
 

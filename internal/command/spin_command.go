@@ -22,7 +22,7 @@ func NewSpinCommand(movieRepository *repository.MovieRepository) *SpinCommand {
 func (c *SpinCommand) Definition() *discordgo.ApplicationCommand {
 	return &discordgo.ApplicationCommand{
 		Name:        "spin",
-		Description: "spin the wheel and get a random movie",
+		Description: "Spin the wheel and get a random movie",
 	}
 }
 

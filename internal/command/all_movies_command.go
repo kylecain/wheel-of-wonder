@@ -34,7 +34,7 @@ func (c *AllMoviesCommand) HandleCommand(s *discordgo.Session, i *discordgo.Inte
 
 	response := "Movies in the wheel:\n"
 	for _, movie := range movies {
-		response += fmt.Sprintf("- %s\n", movie.Title)
+		response += fmt.Sprintf("- ID: %d - Title: %s\n", movie.ID, movie.Title)
 	}
 
 	err = s.InteractionRespond(i.Interaction, &discordgo.InteractionResponse{

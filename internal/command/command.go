@@ -23,6 +23,7 @@ func RegisterAll(s *discordgo.Session, config *config.Config, repository *reposi
 	commands["allmovies"] = NewAllMoviesCommand(repository)
 	commands["spin"] = NewSpinCommand(repository)
 	commands["activemovie"] = NewActiveMovieCommand(repository)
+	commands["setwatched"] = NewSetWatchedCommand(repository)
 
 	for _, cmd := range commands {
 		s.ApplicationCommandCreate(s.State.User.ID, config.GuildId, cmd.Definition())

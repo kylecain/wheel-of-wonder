@@ -32,7 +32,7 @@ func (r *MovieRepository) Create(movie *model.Movie) (int64, error) {
 }
 
 func (r *MovieRepository) GetAll(guildID string) ([]model.Movie, error) {
-	query := "SELECT id, guild_id, user_id, username, title, created_at, updated_at FROM movies WHERE guild_id = ?"
+	query := "SELECT id, guild_id, user_id, username, title, created_at, updated_at FROM movies WHERE guild_id = ? AND watched = 0"
 	rows, err := r.db.Query(query, guildID)
 	if err != nil {
 		slog.Error("failed to query movies", "error", err)
