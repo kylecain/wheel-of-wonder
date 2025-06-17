@@ -67,3 +67,53 @@ func (r *MovieRepository) GetAll(guildID string) ([]model.Movie, error) {
 	slog.Info("retrieved all movies", "count", len(movies))
 	return movies, nil
 }
+
+func (r *MovieRepository) GetActive(guildID string) (*model.Movie, error) {
+	query := "SELECT id, guild_id, user_id, username, title, created_at, updated_at FROM movies WHERE guild_id = ? AND active = 1 LIMIT 1"
+	row := r.db.QueryRow(query, guildID)
+
+	var movie model.Movie
+	if err := row.Scan(
+		&movie.ID,
+		&movie.GuildID,
+		&movie.UserID,
+		&movie.Username,
+		&movie.Title,
+		&movie.CreatedAt,
+		&movie.UpdatedAt,
+	); err != nil {
+		if err == sql.ErrNoRows {
+			slog.Info("no active movie found", "guild_id", guildID)
+			return nil, err
+		}
+		slog.Error("failed to scan active movie", "error", err)
+		return nil, err
+	}
+
+	slog.Info("retrieved active movie", "id", movie.ID, "title", movie.Title)
+	return &movie, nil
+}
+
+func (r *MovieRepository) UpdateActive(movieID int, active bool) error {
+	query := "UPDATE movies SET active = ? WHERE id = ?"
+	_, err := r.db.Exec(query, active, movieID)
+	if err != nil {
+		slog.Error("failed to update movie active status", "error", err, "movie_id", movieID, "active", active)
+		return err
+	}
+
+	slog.Info("updated movie active status", "movie_id", movieID, "active", active)
+	return nil
+}
+
+func (r *MovieRepository) UpdateWatched(movieID int, watched bool) error {
+	query := "UPDATE movies SET watched = ? WHERE id = ?"
+	_, err := r.db.Exec(query, watched, movieID)
+	if err != nil {
+		slog.Error("failed to update movie watched status", "error", err, "movie_id", movieID, "watched", watched)
+		return err
+	}
+
+	slog.Info("updated movie watched status", "movie_id", movieID, "watched", watched)
+	return nil
+}

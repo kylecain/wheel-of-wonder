@@ -34,7 +34,7 @@ func (c *AddMovieCommand) Definition() *discordgo.ApplicationCommand {
 	}
 }
 
-func (h *AddMovieCommand) Handle(s *discordgo.Session, i *discordgo.InteractionCreate) {
+func (c *AddMovieCommand) HandleCommand(s *discordgo.Session, i *discordgo.InteractionCreate) {
 	input := i.ApplicationCommandData().Options[0].StringValue()
 
 	movie := &model.Movie{
@@ -44,7 +44,7 @@ func (h *AddMovieCommand) Handle(s *discordgo.Session, i *discordgo.InteractionC
 		Title:    input,
 	}
 
-	h.MovieRepository.Create(movie)
+	c.MovieRepository.Create(movie)
 
 	response := fmt.Sprintf("You added: %s", input)
 	err := s.InteractionRespond(i.Interaction, &discordgo.InteractionResponse{

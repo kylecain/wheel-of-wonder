@@ -8,24 +8,44 @@ import (
 
 type Command interface {
 	Definition() *discordgo.ApplicationCommand
-	Handle(s *discordgo.Session, i *discordgo.InteractionCreate)
+	HandleCommand(s *discordgo.Session, i *discordgo.InteractionCreate)
 }
 
-var registeredCommands = map[string]Command{}
+type ComponentHandler interface {
+	ComponentHandlers() map[string]func(s *discordgo.Session, i *discordgo.InteractionCreate)
+}
+
+var commands = map[string]Command{}
+var components = map[string]func(s *discordgo.Session, i *discordgo.InteractionCreate){}
 
 func RegisterAll(s *discordgo.Session, config *config.Config, repository *repository.MovieRepository) {
-	registeredCommands["addmovie"] = NewAddMovieCommand(repository)
-	registeredCommands["allmovies"] = NewAllMoviesCommand(repository)
-	registeredCommands["spin"] = NewSpinCommand(repository)
+	commands["addmovie"] = NewAddMovieCommand(repository)
+	commands["allmovies"] = NewAllMoviesCommand(repository)
+	commands["spin"] = NewSpinCommand(repository)
+	commands["activemovie"] = NewActiveMovieCommand(repository)
 
-	for _, cmd := range registeredCommands {
+	for _, cmd := range commands {
 		s.ApplicationCommandCreate(s.State.User.ID, config.GuildId, cmd.Definition())
+
+		if ch, ok := cmd.(ComponentHandler); ok {
+			for customID, handler := range ch.ComponentHandlers() {
+				components[customID] = handler
+			}
+		}
 	}
 
 	s.AddHandler(func(s *discordgo.Session, i *discordgo.InteractionCreate) {
-		cmd := i.ApplicationCommandData().Name
-		if handler, ok := registeredCommands[cmd]; ok {
-			handler.Handle(s, i)
+		switch i.Type {
+		case discordgo.InteractionApplicationCommand:
+			cmd := i.ApplicationCommandData().Name
+			if handler, ok := commands[cmd]; ok {
+				handler.HandleCommand(s, i)
+			}
+		case discordgo.InteractionMessageComponent:
+			customID := i.MessageComponentData().CustomID
+			if handler, ok := components[customID]; ok {
+				handler(s, i)
+			}
 		}
 	})
 }

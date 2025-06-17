@@ -26,8 +26,8 @@ func (c *SpinCommand) Definition() *discordgo.ApplicationCommand {
 	}
 }
 
-func (h *SpinCommand) Handle(s *discordgo.Session, i *discordgo.InteractionCreate) {
-	movies, err := h.MovieRepository.GetAll(i.GuildID)
+func (c *SpinCommand) HandleCommand(s *discordgo.Session, i *discordgo.InteractionCreate) {
+	movies, err := c.MovieRepository.GetAll(i.GuildID)
 	if err != nil {
 		slog.Error("failed to get all movies for spin", "error", err)
 		return
@@ -59,4 +59,13 @@ func (h *SpinCommand) Handle(s *discordgo.Session, i *discordgo.InteractionCreat
 	if err != nil {
 		slog.Error("failed to respond to spin command", "error", err)
 	}
+}
+
+func (c *AddMovieCommand) ComponentHandlers() map[string]func(*discordgo.Session, *discordgo.InteractionCreate) {
+	return map[string]func(*discordgo.Session, *discordgo.InteractionCreate){
+		"set_active_movie": c.setActiveMovieHandler,
+	}
+}
+
+func (c *AddMovieCommand) setActiveMovieHandler(s *discordgo.Session, i *discordgo.InteractionCreate) {
 }
