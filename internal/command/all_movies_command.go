@@ -28,7 +28,7 @@ func (c *AllMoviesCommand) Definition() *discordgo.ApplicationCommand {
 func (c *AllMoviesCommand) HandleCommand(s *discordgo.Session, i *discordgo.InteractionCreate) {
 	movies, err := c.MovieRepository.GetAll(i.GuildID)
 	if err != nil {
-		slog.Error("failed to get all movies", "error", err)
+		InteractionResponseError(s, i, err, "Failed to get all movies.")
 		return
 	}
 

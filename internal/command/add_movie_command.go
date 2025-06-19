@@ -46,15 +46,14 @@ func (c *AddMovieCommand) HandleCommand(s *discordgo.Session, i *discordgo.Inter
 
 	_, err := c.MovieRepository.Create(movie)
 	if err != nil {
-		slog.Error("failed to add movie", "error", err)
+		InteractionResponseError(s, i, err, "Failed to add movie.")
 		return
 	}
 
-	response := fmt.Sprintf("You added: %s", input)
 	err = s.InteractionRespond(i.Interaction, &discordgo.InteractionResponse{
 		Type: discordgo.InteractionResponseChannelMessageWithSource,
 		Data: &discordgo.InteractionResponseData{
-			Content: response,
+			Content: fmt.Sprintf("You added: %s", input),
 		},
 	})
 	if err != nil {

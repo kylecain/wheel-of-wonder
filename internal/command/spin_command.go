@@ -31,21 +31,8 @@ func (c *SpinCommand) Definition() *discordgo.ApplicationCommand {
 
 func (c *SpinCommand) HandleCommand(s *discordgo.Session, i *discordgo.InteractionCreate) {
 	movies, err := c.MovieRepository.GetAll(i.GuildID)
-	if err != nil {
-		slog.Error("failed to get all movies for spin", "error", err)
-		return
-	}
-
-	if len(movies) == 0 {
-		err = s.InteractionRespond(i.Interaction, &discordgo.InteractionResponse{
-			Type: discordgo.InteractionResponseChannelMessageWithSource,
-			Data: &discordgo.InteractionResponseData{
-				Content: "No movies available to spin.",
-			},
-		})
-		if err != nil {
-			slog.Error("failed to respond to spin command", "error", err)
-		}
+	if err != nil || len(movies) == 0 {
+		InteractionResponseError(s, i, err, "failed to get all movies for spin")
 		return
 	}
 
@@ -84,27 +71,25 @@ func (c *AddMovieCommand) setActiveMovieHandler(s *discordgo.Session, i *discord
 
 	movieID, err := strconv.Atoi(value)
 	if err != nil {
-		slog.Error("failed to convert movieID to int", "error", err)
+		InteractionResponseError(s, i, err, "Failed to convert movieID")
 		return
 	}
 
 	currentlyActiveMovie, err := c.MovieRepository.GetActive(i.GuildID)
-	if err != nil {
-		if err != sql.ErrNoRows {
-			slog.Error("failed to get currently active movie", "error", err)
-			return
-		}
+	if err != nil && err != sql.ErrNoRows {
+		InteractionResponseError(s, i, err, "failed to get currently active movie")
+		return
 	}
 
 	err = c.MovieRepository.UpdateActive(currentlyActiveMovie.ID, false)
 	if err != nil {
-		slog.Error("failed to update currently active movie", "error", err, "movieID", currentlyActiveMovie.ID)
+		InteractionResponseError(s, i, err, "failed to update currently active movie")
 		return
 	}
 
 	err = c.MovieRepository.UpdateActive(movieID, true)
 	if err != nil {
-		slog.Error("failed to update currently active movie", "error", err, "movieID", movieID)
+		InteractionResponseError(s, i, err, "failed to update currently active movie")
 		return
 	}
 

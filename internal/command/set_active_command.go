@@ -3,7 +3,6 @@ package command
 import (
 	"fmt"
 	"log/slog"
-	"strconv"
 
 	"github.com/bwmarrin/discordgo"
 	"github.com/kylecain/wheel-of-wonder/internal/db/repository"
@@ -35,31 +34,20 @@ func (c *SetActiveCommand) Definition() *discordgo.ApplicationCommand {
 }
 
 func (c *SetActiveCommand) HandleCommand(s *discordgo.Session, i *discordgo.InteractionCreate) {
-	input := i.ApplicationCommandData().Options[0].StringValue()
-	movieID, err := strconv.Atoi(input)
-	if err != nil {
-		s.InteractionRespond(i.Interaction, &discordgo.InteractionResponse{
-			Type: discordgo.InteractionResponseChannelMessageWithSource,
-			Data: &discordgo.InteractionResponseData{
-				Content: fmt.Sprintf("Invalid movie ID: %s", input),
-			},
-		})
-		return
-	}
+	input := i.ApplicationCommandData().Options[0].IntValue()
 
-	err = c.MovieRepository.UpdateActive(movieID, true)
+	err := c.MovieRepository.UpdateActive(int(input), true)
 	if err != nil {
-		slog.Error("failed to update active movie", "error", err)
+		InteractionResponseError(s, i, err, "Failed to update active movie.")
 		return
 	}
 
 	err = s.InteractionRespond(i.Interaction, &discordgo.InteractionResponse{
 		Type: discordgo.InteractionResponseChannelMessageWithSource,
 		Data: &discordgo.InteractionResponseData{
-			Content: fmt.Sprintf("You set %s as active", input),
+			Content: fmt.Sprintf("You set %d as active", input),
 		},
 	})
-
 	if err != nil {
 		slog.Error("failed to respond to add command", "error", err)
 	}

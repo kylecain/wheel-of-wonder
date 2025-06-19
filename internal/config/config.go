@@ -8,10 +8,11 @@ import (
 )
 
 type Config struct {
-	BotToken     string
-	GuildId      string
-	MigrationUrl string
-	DatabaseUrl  string
+	BotToken      string
+	ApplicationID string
+	GuildId       string
+	MigrationUrl  string
+	DatabaseUrl   string
 }
 
 func NewConfig() *Config {
@@ -22,14 +23,16 @@ func NewConfig() *Config {
 	}
 
 	botToken := os.Getenv("BOT_TOKEN")
+	applicationID := os.Getenv("APPLICATION_ID")
 	guildId := os.Getenv("GUILD_ID")
 	migationUrl := os.Getenv("MIGRATION_URL")
 	databaseUrl := os.Getenv("DATABASE_URL")
 
 	return &Config{
-		BotToken:     botToken,
-		GuildId:      guildId,
-		MigrationUrl: migationUrl,
-		DatabaseUrl:  databaseUrl,
+		BotToken:      botToken,
+		ApplicationID: applicationID,
+		GuildId:       guildId,
+		MigrationUrl:  migationUrl,
+		DatabaseUrl:   databaseUrl,
 	}
 }

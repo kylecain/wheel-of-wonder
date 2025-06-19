@@ -3,7 +3,6 @@ package command
 import (
 	"fmt"
 	"log/slog"
-	"strconv"
 
 	"github.com/bwmarrin/discordgo"
 	"github.com/kylecain/wheel-of-wonder/internal/db/repository"
@@ -35,30 +34,18 @@ func (c *SetWatchedCommand) Definition() *discordgo.ApplicationCommand {
 }
 
 func (c *SetWatchedCommand) HandleCommand(s *discordgo.Session, i *discordgo.InteractionCreate) {
-	input := i.ApplicationCommandData().Options[0].StringValue()
-	movieID, err := strconv.Atoi(input)
+	input := i.ApplicationCommandData().Options[0].IntValue()
+
+	err := c.MovieRepository.UpdateWatched(int(input), true)
 	if err != nil {
-		response := fmt.Sprintf("Invalid movie ID: %s", input)
-		s.InteractionRespond(i.Interaction, &discordgo.InteractionResponse{
-			Type: discordgo.InteractionResponseChannelMessageWithSource,
-			Data: &discordgo.InteractionResponseData{
-				Content: response,
-			},
-		})
+		InteractionResponseError(s, i, err, "failed to update watched movie")
 		return
 	}
 
-	err = c.MovieRepository.UpdateWatched(movieID, true)
-	if err != nil {
-		slog.Error("failed to update watched movie", "error", err)
-		return
-	}
-
-	response := fmt.Sprintf("You set %s as watched", input)
 	err = s.InteractionRespond(i.Interaction, &discordgo.InteractionResponse{
 		Type: discordgo.InteractionResponseChannelMessageWithSource,
 		Data: &discordgo.InteractionResponseData{
-			Content: response,
+			Content: fmt.Sprintf("You set %d as watched", input),
 		},
 	})
 	if err != nil {
