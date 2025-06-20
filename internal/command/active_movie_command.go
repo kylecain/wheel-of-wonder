@@ -27,7 +27,7 @@ func (c *ActiveMovieCommand) Definition() *discordgo.ApplicationCommand {
 
 func (c *ActiveMovieCommand) HandleCommand(s *discordgo.Session, i *discordgo.InteractionCreate) {
 	activeMovie, err := c.MovieRepository.GetActive(i.GuildID)
-	if err != nil {
+	if err != nil || activeMovie == nil {
 		InteractionResponseError(s, i, err, "Failed to retrieve active movie.")
 		return
 	}

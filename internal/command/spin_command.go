@@ -1,7 +1,6 @@
 package command
 
 import (
-	"database/sql"
 	"fmt"
 	"log/slog"
 	"math/rand"
@@ -76,7 +75,7 @@ func (c *AddMovieCommand) setActiveMovieHandler(s *discordgo.Session, i *discord
 	}
 
 	currentlyActiveMovie, err := c.MovieRepository.GetActive(i.GuildID)
-	if err != nil && err != sql.ErrNoRows {
+	if err != nil || currentlyActiveMovie == nil {
 		InteractionResponseError(s, i, err, "failed to get currently active movie")
 		return
 	}

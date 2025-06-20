@@ -44,7 +44,7 @@ func (c *AddMovieCommand) HandleCommand(s *discordgo.Session, i *discordgo.Inter
 		Title:    input,
 	}
 
-	_, err := c.MovieRepository.Create(movie)
+	_, err := c.MovieRepository.AddMovie(movie)
 	if err != nil {
 		InteractionResponseError(s, i, err, "Failed to add movie.")
 		return
