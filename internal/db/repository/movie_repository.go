@@ -35,6 +35,31 @@ func (r *MovieRepository) AddMovie(movie *model.Movie) (int64, error) {
 	return id, nil
 }
 
+func (r *MovieRepository) GetMovieByID(movieID int) (*model.Movie, error) {
+	var movie model.Movie
+
+	query := "SELECT id, guild_id, user_id, username, title, created_at, updated_at FROM movies WHERE id = ?"
+	row := r.db.QueryRow(query, movieID)
+
+	if err := row.Scan(
+		&movie.ID,
+		&movie.GuildID,
+		&movie.UserID,
+		&movie.Username,
+		&movie.Title,
+		&movie.CreatedAt,
+		&movie.UpdatedAt,
+	); err != nil {
+		if err == sql.ErrNoRows {
+			slog.Info("no movie found", "id", movieID)
+			return nil, nil
+		}
+		return nil, fmt.Errorf("GetMovieByID Error: %v", err)
+	}
+	slog.Info("retrieved movie", "id", movie.ID, "title", movie.Title)
+	return &movie, nil
+}
+
 func (r *MovieRepository) GetAll(guildID string) ([]model.Movie, error) {
 	var movies []model.Movie
 

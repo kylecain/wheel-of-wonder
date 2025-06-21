@@ -46,7 +46,7 @@ func (c *SpinCommand) HandleCommand(s *discordgo.Session, i *discordgo.Interacti
 						discordgo.Button{
 							Style:    discordgo.PrimaryButton,
 							Label:    "Set as Active",
-							CustomID: fmt.Sprintf("%s:%d", customIdSetActiveMovie, selectedMovie.ID),
+							CustomID: fmt.Sprintf("%s:%d:%s", customIdSetActiveMovie, selectedMovie.ID, selectedMovie.Title),
 						},
 					},
 				},
@@ -61,14 +61,17 @@ func (c *SpinCommand) HandleCommand(s *discordgo.Session, i *discordgo.Interacti
 
 func (c *AddMovieCommand) ComponentHandlers() map[string]func(*discordgo.Session, *discordgo.InteractionCreate) {
 	return map[string]func(*discordgo.Session, *discordgo.InteractionCreate){
-		customIdSetActiveMovie: c.setActiveMovieHandler,
+		customIdSetActiveMovie:   c.setActiveMovieHandler,
+		customIdCreateEventModal: c.createEventModalHandler,
+		// customIdCreateEvent:      c.createEventHandler,
 	}
 }
 
 func (c *AddMovieCommand) setActiveMovieHandler(s *discordgo.Session, i *discordgo.InteractionCreate) {
-	value := strings.Split(i.MessageComponentData().CustomID, ":")[1]
+	args := strings.Split(i.MessageComponentData().CustomID, ":")
+	movieIDStr, movieTitle := args[1], args[2]
 
-	movieID, err := strconv.Atoi(value)
+	movieID, err := strconv.Atoi(movieIDStr)
 	if err != nil {
 		InteractionResponseError(s, i, err, "Failed to convert movieID")
 		return
@@ -92,11 +95,94 @@ func (c *AddMovieCommand) setActiveMovieHandler(s *discordgo.Session, i *discord
 		return
 	}
 
-	_ = s.InteractionRespond(i.Interaction, &discordgo.InteractionResponse{
+	activeMovie, err := c.MovieRepository.GetMovieByID(movieID)
+	if err != nil || activeMovie == nil {
+		InteractionResponseError(s, i, err, "failed to retrieve active movie")
+		return
+	}
+
+	err = s.InteractionRespond(i.Interaction, &discordgo.InteractionResponse{
 		Type: discordgo.InteractionResponseChannelMessageWithSource,
 		Data: &discordgo.InteractionResponseData{
-			Content: fmt.Sprintf("You set the movie with ID %d as active.", movieID),
+			Content: fmt.Sprintf("You set %s as the active movie.", activeMovie.Title),
 			Flags:   discordgo.MessageFlagsEphemeral,
+			Components: []discordgo.MessageComponent{
+				discordgo.ActionsRow{
+					Components: []discordgo.MessageComponent{
+						discordgo.Button{
+							Style:    discordgo.PrimaryButton,
+							Label:    "Create Event",
+							CustomID: fmt.Sprintf("%s:%s:%s", customIdCreateEventModal, movieIDStr, movieTitle),
+						},
+					},
+				},
+			},
 		},
 	})
+	if err != nil {
+		slog.Error("failed to respond to set active movie command", "error", err)
+		return
+	}
 }
+
+func (c *AddMovieCommand) createEventModalHandler(s *discordgo.Session, i *discordgo.InteractionCreate) {
+	args := strings.Split(i.MessageComponentData().CustomID, ":")
+	movieIDStr, movieTitle := args[1], args[2]
+
+	err := s.InteractionRespond(i.Interaction, &discordgo.InteractionResponse{
+		Type: discordgo.InteractionResponseModal,
+		Data: &discordgo.InteractionResponseData{
+			CustomID: fmt.Sprintf("%s:%s:%s", customIdCreateEventModal, movieIDStr, movieTitle),
+			Title:    "Create Event",
+			Components: []discordgo.MessageComponent{
+				discordgo.ActionsRow{
+					Components: []discordgo.MessageComponent{
+						discordgo.TextInput{
+							CustomID:    "date",
+							Label:       "Enter the date of the event",
+							Style:       discordgo.TextInputShort,
+							Placeholder: "YYYY-MM-DD",
+							Required:    true,
+							MaxLength:   10,
+							MinLength:   10,
+						},
+					},
+				},
+				discordgo.ActionsRow{
+					Components: []discordgo.MessageComponent{
+						discordgo.TextInput{
+							CustomID:    "time",
+							Label:       "Enter the time of the event (24-hour format)",
+							Style:       discordgo.TextInputShort,
+							Placeholder: "HH:mm:ss",
+							Required:    true,
+							MaxLength:   8,
+							MinLength:   8,
+						},
+					},
+				},
+				discordgo.ActionsRow{
+					Components: []discordgo.MessageComponent{
+						discordgo.TextInput{
+							CustomID:    "timezone",
+							Label:       "Enter the timezone of the event",
+							Style:       discordgo.TextInputShort,
+							Placeholder: "America/Chicago",
+							Required:    true,
+							MaxLength:   50,
+							MinLength:   8,
+						},
+					},
+				},
+			},
+		},
+	})
+	if err != nil {
+		InteractionResponseError(s, i, err, "failed to create event modal")
+		return
+	}
+}
+
+// func (c *SpinCommand) createEventHandler(s *discordgo.Session, i *discordgo.InteractionCreate) {
+// 	data := i.ModalSubmitData()
+// }
