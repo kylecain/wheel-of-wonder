@@ -18,7 +18,7 @@ func NewSetActive(movieRepository *repository.MovieRepository) *SetActive {
 	}
 }
 
-func (c *SetActive) Definition() *discordgo.ApplicationCommand {
+func (c *SetActive) ApplicationCommand() *discordgo.ApplicationCommand {
 	return &discordgo.ApplicationCommand{
 		Name:        commandNameSetActive,
 		Description: "Set a movie as active by ID",
@@ -33,7 +33,7 @@ func (c *SetActive) Definition() *discordgo.ApplicationCommand {
 	}
 }
 
-func (c *SetActive) HandleCommand(s *discordgo.Session, i *discordgo.InteractionCreate) {
+func (c *SetActive) Handler(s *discordgo.Session, i *discordgo.InteractionCreate) {
 	input := i.ApplicationCommandData().Options[0].IntValue()
 
 	err := c.MovieRepository.UpdateActive(int(input), true)

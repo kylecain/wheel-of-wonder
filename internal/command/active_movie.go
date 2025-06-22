@@ -18,14 +18,14 @@ func NewActiveMovie(movieRepository *repository.MovieRepository) *ActiveMovie {
 	}
 }
 
-func (c *ActiveMovie) Definition() *discordgo.ApplicationCommand {
+func (c *ActiveMovie) ApplicationCommand() *discordgo.ApplicationCommand {
 	return &discordgo.ApplicationCommand{
 		Name:        commandNameSetActive,
 		Description: "Show the active movie",
 	}
 }
 
-func (c *ActiveMovie) HandleCommand(s *discordgo.Session, i *discordgo.InteractionCreate) {
+func (c *ActiveMovie) Handler(s *discordgo.Session, i *discordgo.InteractionCreate) {
 	activeMovie, err := c.MovieRepository.GetActive(i.GuildID)
 	if err != nil || activeMovie == nil {
 		InteractionResponseError(s, i, err, "Failed to retrieve active movie.")

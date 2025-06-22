@@ -19,7 +19,7 @@ func NewAddMovie(movieRepository *repository.MovieRepository) *AddMovie {
 	}
 }
 
-func (c *AddMovie) Definition() *discordgo.ApplicationCommand {
+func (c *AddMovie) ApplicationCommand() *discordgo.ApplicationCommand {
 	return &discordgo.ApplicationCommand{
 		Name:        commandNameAddMovie,
 		Description: "Add a movie",
@@ -34,7 +34,7 @@ func (c *AddMovie) Definition() *discordgo.ApplicationCommand {
 	}
 }
 
-func (c *AddMovie) HandleCommand(s *discordgo.Session, i *discordgo.InteractionCreate) {
+func (c *AddMovie) Handler(s *discordgo.Session, i *discordgo.InteractionCreate) {
 	input := i.ApplicationCommandData().Options[0].StringValue()
 
 	movie := &model.Movie{

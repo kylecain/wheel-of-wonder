@@ -20,14 +20,14 @@ func NewSpin(movieRepository *repository.MovieRepository) *Spin {
 	}
 }
 
-func (c *Spin) Definition() *discordgo.ApplicationCommand {
+func (c *Spin) ApplicationCommand() *discordgo.ApplicationCommand {
 	return &discordgo.ApplicationCommand{
 		Name:        commandNameSpin,
 		Description: "Spin the wheel and get a random movie",
 	}
 }
 
-func (c *Spin) HandleCommand(s *discordgo.Session, i *discordgo.InteractionCreate) {
+func (c *Spin) Handler(s *discordgo.Session, i *discordgo.InteractionCreate) {
 	movies, err := c.MovieRepository.GetAll(i.GuildID)
 	if err != nil || len(movies) == 0 {
 		InteractionResponseError(s, i, err, "failed to get all movies for spin")

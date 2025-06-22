@@ -7,12 +7,8 @@ import (
 )
 
 type Command interface {
-	Definition() *discordgo.ApplicationCommand
-	HandleCommand(s *discordgo.Session, i *discordgo.InteractionCreate)
-}
-
-type ComponentHandler interface {
-	ComponentHandlers() map[string]func(s *discordgo.Session, i *discordgo.InteractionCreate)
+	ApplicationCommand() *discordgo.ApplicationCommand
+	Handler(s *discordgo.Session, i *discordgo.InteractionCreate)
 }
 
 var commands = map[string]Command{}
@@ -26,14 +22,14 @@ func RegisterAll(s *discordgo.Session, config *config.Config, repository *reposi
 	commands[commandNameSetWatched] = NewSetWatched(repository)
 
 	for _, cmd := range commands {
-		s.ApplicationCommandCreate(s.State.User.ID, config.GuildId, cmd.Definition())
+		s.ApplicationCommandCreate(s.State.User.ID, config.GuildId, cmd.ApplicationCommand())
 	}
 
 	s.AddHandler(func(s *discordgo.Session, i *discordgo.InteractionCreate) {
 		if i.Type == discordgo.InteractionApplicationCommand {
 			cmd := i.ApplicationCommandData().Name
 			if handler, ok := commands[cmd]; ok {
-				handler.HandleCommand(s, i)
+				handler.Handler(s, i)
 			}
 		}
 	})

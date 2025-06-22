@@ -18,14 +18,14 @@ func NewAllMovies(movieRepository *repository.MovieRepository) *AllMovies {
 	}
 }
 
-func (c *AllMovies) Definition() *discordgo.ApplicationCommand {
+func (c *AllMovies) ApplicationCommand() *discordgo.ApplicationCommand {
 	return &discordgo.ApplicationCommand{
 		Name:        commandNameAllMovies,
 		Description: "Get all movies in the wheel",
 	}
 }
 
-func (c *AllMovies) HandleCommand(s *discordgo.Session, i *discordgo.InteractionCreate) {
+func (c *AllMovies) Handler(s *discordgo.Session, i *discordgo.InteractionCreate) {
 	movies, err := c.MovieRepository.GetAll(i.GuildID)
 	if err != nil {
 		InteractionResponseError(s, i, err, "Failed to get all movies.")
