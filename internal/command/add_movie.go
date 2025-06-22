@@ -9,17 +9,17 @@ import (
 	"github.com/kylecain/wheel-of-wonder/internal/model"
 )
 
-type AddMovieCommand struct {
+type AddMovie struct {
 	MovieRepository *repository.MovieRepository
 }
 
-func NewAddMovieCommand(movieRepository *repository.MovieRepository) *AddMovieCommand {
-	return &AddMovieCommand{
+func NewAddMovie(movieRepository *repository.MovieRepository) *AddMovie {
+	return &AddMovie{
 		MovieRepository: movieRepository,
 	}
 }
 
-func (c *AddMovieCommand) Definition() *discordgo.ApplicationCommand {
+func (c *AddMovie) Definition() *discordgo.ApplicationCommand {
 	return &discordgo.ApplicationCommand{
 		Name:        commandNameAddMovie,
 		Description: "Add a movie",
@@ -34,7 +34,7 @@ func (c *AddMovieCommand) Definition() *discordgo.ApplicationCommand {
 	}
 }
 
-func (c *AddMovieCommand) HandleCommand(s *discordgo.Session, i *discordgo.InteractionCreate) {
+func (c *AddMovie) HandleCommand(s *discordgo.Session, i *discordgo.InteractionCreate) {
 	input := i.ApplicationCommandData().Options[0].StringValue()
 
 	movie := &model.Movie{

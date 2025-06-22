@@ -8,17 +8,17 @@ import (
 	"github.com/kylecain/wheel-of-wonder/internal/db/repository"
 )
 
-type SetActiveCommand struct {
+type SetActive struct {
 	MovieRepository *repository.MovieRepository
 }
 
-func NewSetActiveCommand(movieRepository *repository.MovieRepository) *SetActiveCommand {
-	return &SetActiveCommand{
+func NewSetActive(movieRepository *repository.MovieRepository) *SetActive {
+	return &SetActive{
 		MovieRepository: movieRepository,
 	}
 }
 
-func (c *SetActiveCommand) Definition() *discordgo.ApplicationCommand {
+func (c *SetActive) Definition() *discordgo.ApplicationCommand {
 	return &discordgo.ApplicationCommand{
 		Name:        commandNameSetActive,
 		Description: "Set a movie as active by ID",
@@ -33,7 +33,7 @@ func (c *SetActiveCommand) Definition() *discordgo.ApplicationCommand {
 	}
 }
 
-func (c *SetActiveCommand) HandleCommand(s *discordgo.Session, i *discordgo.InteractionCreate) {
+func (c *SetActive) HandleCommand(s *discordgo.Session, i *discordgo.InteractionCreate) {
 	input := i.ApplicationCommandData().Options[0].IntValue()
 
 	err := c.MovieRepository.UpdateActive(int(input), true)

@@ -18,12 +18,12 @@ type ComponentHandler interface {
 var commands = map[string]Command{}
 
 func RegisterAll(s *discordgo.Session, config *config.Config, repository *repository.MovieRepository) {
-	commands[commandNameAddMovie] = NewAddMovieCommand(repository)
-	commands[commandNameAllMovies] = NewAllMoviesCommand(repository)
-	commands[commandNameSpin] = NewSpinCommand(repository)
-	commands[commandNameActiveMovie] = NewActiveMovieCommand(repository)
-	commands[commandNameSetActive] = NewSetActiveCommand(repository)
-	commands[commandNameSetWatched] = NewSetWatchedCommand(repository)
+	commands[commandNameAddMovie] = NewAddMovie(repository)
+	commands[commandNameAllMovies] = NewAllMovies(repository)
+	commands[commandNameSpin] = NewSpin(repository)
+	commands[commandNameActiveMovie] = NewActiveMovie(repository)
+	commands[commandNameSetActive] = NewSetActive(repository)
+	commands[commandNameSetWatched] = NewSetWatched(repository)
 
 	for _, cmd := range commands {
 		s.ApplicationCommandCreate(s.State.User.ID, config.GuildId, cmd.Definition())

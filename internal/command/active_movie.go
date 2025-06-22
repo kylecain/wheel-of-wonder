@@ -8,24 +8,24 @@ import (
 	"github.com/kylecain/wheel-of-wonder/internal/db/repository"
 )
 
-type ActiveMovieCommand struct {
+type ActiveMovie struct {
 	MovieRepository *repository.MovieRepository
 }
 
-func NewActiveMovieCommand(movieRepository *repository.MovieRepository) *ActiveMovieCommand {
-	return &ActiveMovieCommand{
+func NewActiveMovie(movieRepository *repository.MovieRepository) *ActiveMovie {
+	return &ActiveMovie{
 		MovieRepository: movieRepository,
 	}
 }
 
-func (c *ActiveMovieCommand) Definition() *discordgo.ApplicationCommand {
+func (c *ActiveMovie) Definition() *discordgo.ApplicationCommand {
 	return &discordgo.ApplicationCommand{
 		Name:        commandNameSetActive,
 		Description: "Show the active movie",
 	}
 }
 
-func (c *ActiveMovieCommand) HandleCommand(s *discordgo.Session, i *discordgo.InteractionCreate) {
+func (c *ActiveMovie) HandleCommand(s *discordgo.Session, i *discordgo.InteractionCreate) {
 	activeMovie, err := c.MovieRepository.GetActive(i.GuildID)
 	if err != nil || activeMovie == nil {
 		InteractionResponseError(s, i, err, "Failed to retrieve active movie.")

@@ -10,24 +10,24 @@ import (
 	"github.com/kylecain/wheel-of-wonder/internal/db/repository"
 )
 
-type SpinCommand struct {
+type Spin struct {
 	MovieRepository *repository.MovieRepository
 }
 
-func NewSpinCommand(movieRepository *repository.MovieRepository) *SpinCommand {
-	return &SpinCommand{
+func NewSpin(movieRepository *repository.MovieRepository) *Spin {
+	return &Spin{
 		MovieRepository: movieRepository,
 	}
 }
 
-func (c *SpinCommand) Definition() *discordgo.ApplicationCommand {
+func (c *Spin) Definition() *discordgo.ApplicationCommand {
 	return &discordgo.ApplicationCommand{
 		Name:        commandNameSpin,
 		Description: "Spin the wheel and get a random movie",
 	}
 }
 
-func (c *SpinCommand) HandleCommand(s *discordgo.Session, i *discordgo.InteractionCreate) {
+func (c *Spin) HandleCommand(s *discordgo.Session, i *discordgo.InteractionCreate) {
 	movies, err := c.MovieRepository.GetAll(i.GuildID)
 	if err != nil || len(movies) == 0 {
 		InteractionResponseError(s, i, err, "failed to get all movies for spin")
