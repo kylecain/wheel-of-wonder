@@ -13,11 +13,13 @@ import (
 
 type SetActive struct {
 	MovieRepository *repository.Movie
+	UserRepository  *repository.User
 }
 
-func NewSetActive(movieRepository *repository.Movie) *SetActive {
+func NewSetActive(movieRepository *repository.Movie, userRepository *repository.User) *SetActive {
 	return &SetActive{
 		MovieRepository: movieRepository,
+		UserRepository:  userRepository,
 	}
 }
 
@@ -63,6 +65,20 @@ func (c *SetActive) Handler(s *discordgo.Session, i *discordgo.InteractionCreate
 		return
 	}
 
+	components := []discordgo.MessageComponent{
+		CreateEventButton(movieIDStr, movieTitle),
+	}
+
+	user, _ := c.UserRepository.UserByUserId(i.Member.User.ID)
+	if user != nil {
+		components = append(
+			[]discordgo.MessageComponent{
+				CreateEventPreferredtimeButton(movieIDStr, movieTitle),
+			},
+			components...,
+		)
+	}
+
 	err = s.InteractionRespond(i.Interaction, &discordgo.InteractionResponse{
 		Type: discordgo.InteractionResponseChannelMessageWithSource,
 		Data: &discordgo.InteractionResponseData{
@@ -70,10 +86,7 @@ func (c *SetActive) Handler(s *discordgo.Session, i *discordgo.InteractionCreate
 			Flags:   discordgo.MessageFlagsEphemeral,
 			Components: []discordgo.MessageComponent{
 				discordgo.ActionsRow{
-					Components: []discordgo.MessageComponent{
-						CreateEventPreferredtimeButton(movieIDStr, movieTitle),
-						CreateEventButton(movieIDStr, movieTitle),
-					},
+					Components: components,
 				},
 			},
 		},

@@ -20,7 +20,7 @@ func RegisterAll(
 	movieRepository *repository.Movie,
 	userRepository *repository.User,
 ) {
-	components[CustomIdSetActiveMovie] = NewSetActive(movieRepository)
+	components[CustomIdSetActiveMovie] = NewSetActive(movieRepository, userRepository)
 	components[CustomIdCreateEvent] = NewCreateEvent(movieRepository)
 	components[CustomIdCreateEventModal] = NewEventDetails(config)
 	components[CustomIDSetPreferredTimeModal] = NewSetPreferredEventTime(userRepository)
