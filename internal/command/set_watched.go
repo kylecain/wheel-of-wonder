@@ -24,7 +24,7 @@ func (c *SetWatched) ApplicationCommand() *discordgo.ApplicationCommand {
 		Description: "Set a movie as watched by ID",
 		Options: []*discordgo.ApplicationCommandOption{
 			{
-				Type:        discordgo.ApplicationCommandOptionString,
+				Type:        discordgo.ApplicationCommandOptionInteger,
 				Name:        "movie_id",
 				Description: "Movie ID that will be set as watched",
 				Required:    true,
@@ -36,7 +36,7 @@ func (c *SetWatched) ApplicationCommand() *discordgo.ApplicationCommand {
 func (c *SetWatched) Handler(s *discordgo.Session, i *discordgo.InteractionCreate) {
 	input := i.ApplicationCommandData().Options[0].IntValue()
 
-	err := c.MovieRepository.UpdateWatched(int(input), true)
+	err := c.MovieRepository.UpdateWatched(input, true)
 	if err != nil {
 		InteractionResponseError(s, i, err, "failed to update watched movie")
 		return

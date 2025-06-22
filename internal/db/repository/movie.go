@@ -121,7 +121,7 @@ func (r *Movie) GetActive(guildID string) (*model.Movie, error) {
 	return &movie, nil
 }
 
-func (r *Movie) UpdateActive(movieID int, active bool) error {
+func (r *Movie) UpdateActive(movieID int64, active bool) error {
 	query := "UPDATE movies SET active = ? WHERE id = ?"
 	_, err := r.db.Exec(query, active, movieID)
 	if err != nil {
@@ -132,7 +132,7 @@ func (r *Movie) UpdateActive(movieID int, active bool) error {
 	return nil
 }
 
-func (r *Movie) UpdateWatched(movieID int, watched bool) error {
+func (r *Movie) UpdateWatched(movieID int64, watched bool) error {
 	query := "UPDATE movies SET watched = ? WHERE id = ?"
 	_, err := r.db.Exec(query, watched, movieID)
 	if err != nil {

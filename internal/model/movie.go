@@ -3,7 +3,7 @@ package model
 import "time"
 
 type Movie struct {
-	ID        int
+	ID        int64
 	GuildID   string
 	UserID    string
 	Username  string

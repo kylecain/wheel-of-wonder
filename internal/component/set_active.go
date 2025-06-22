@@ -51,7 +51,7 @@ func (c *SetActive) Handler(s *discordgo.Session, i *discordgo.InteractionCreate
 		return
 	}
 
-	err = c.MovieRepository.UpdateActive(movieID, true)
+	err = c.MovieRepository.UpdateActive(int64(movieID), true)
 	if err != nil {
 		InteractionResponseError(s, i, err, "failed to update currently active movie")
 		return

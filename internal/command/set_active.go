@@ -24,7 +24,7 @@ func (c *SetActive) ApplicationCommand() *discordgo.ApplicationCommand {
 		Description: "Set a movie as active by ID",
 		Options: []*discordgo.ApplicationCommandOption{
 			{
-				Type:        discordgo.ApplicationCommandOptionString,
+				Type:        discordgo.ApplicationCommandOptionInteger,
 				Name:        "movie_id",
 				Description: "Movie ID that will be set as active",
 				Required:    true,
@@ -36,7 +36,7 @@ func (c *SetActive) ApplicationCommand() *discordgo.ApplicationCommand {
 func (c *SetActive) Handler(s *discordgo.Session, i *discordgo.InteractionCreate) {
 	input := i.ApplicationCommandData().Options[0].IntValue()
 
-	err := c.MovieRepository.UpdateActive(int(input), true)
+	err := c.MovieRepository.UpdateActive(input, true)
 	if err != nil {
 		InteractionResponseError(s, i, err, "Failed to update active movie.")
 		return
