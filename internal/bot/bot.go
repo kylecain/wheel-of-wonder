@@ -5,6 +5,7 @@ import (
 
 	"github.com/bwmarrin/discordgo"
 	"github.com/kylecain/wheel-of-wonder/internal/command"
+	"github.com/kylecain/wheel-of-wonder/internal/component"
 	"github.com/kylecain/wheel-of-wonder/internal/config"
 	"github.com/kylecain/wheel-of-wonder/internal/db/repository"
 )
@@ -36,6 +37,7 @@ func (b *Bot) Start() error {
 	movieRepository := repository.NewMovieRepository(b.DB)
 
 	command.RegisterAll(b.Session, b.Config, movieRepository)
+	component.RegisterAll(b.Session, b.Config, movieRepository)
 
 	return nil
 }
