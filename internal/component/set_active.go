@@ -42,15 +42,23 @@ func (c *SetActive) Handler(s *discordgo.Session, i *discordgo.InteractionCreate
 	}
 
 	currentlyActiveMovie, err := c.MovieRepository.GetActive(i.GuildID)
-	if err != nil || currentlyActiveMovie == nil {
+	if err != nil {
 		InteractionResponseError(s, i, err, "failed to get currently active movie")
 		return
 	}
 
-	err = c.MovieRepository.UpdateActive(currentlyActiveMovie.ID, false)
-	if err != nil {
-		InteractionResponseError(s, i, err, "failed to update currently active movie")
-		return
+	if currentlyActiveMovie != nil {
+		err = c.MovieRepository.UpdateActive(currentlyActiveMovie.ID, false)
+		if err != nil {
+			InteractionResponseError(s, i, err, "failed to update currently active movie")
+			return
+		}
+
+		err = c.MovieRepository.UpdateWatched(currentlyActiveMovie.ID, true)
+		if err != nil {
+			InteractionResponseError(s, i, err, "failed to update previous movie to watched")
+			return
+		}
 	}
 
 	err = c.MovieRepository.UpdateActive(int64(movieID), true)
