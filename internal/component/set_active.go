@@ -12,10 +12,10 @@ import (
 )
 
 type SetActive struct {
-	MovieRepository *repository.MovieRepository
+	MovieRepository *repository.Movie
 }
 
-func NewSetActive(movieRepository *repository.MovieRepository) *SetActive {
+func NewSetActive(movieRepository *repository.Movie) *SetActive {
 	return &SetActive{
 		MovieRepository: movieRepository,
 	}

@@ -9,10 +9,10 @@ import (
 )
 
 type SetWatched struct {
-	MovieRepository *repository.MovieRepository
+	MovieRepository *repository.Movie
 }
 
-func NewSetWatched(movieRepository *repository.MovieRepository) *SetWatched {
+func NewSetWatched(movieRepository *repository.Movie) *SetWatched {
 	return &SetWatched{
 		MovieRepository: movieRepository,
 	}

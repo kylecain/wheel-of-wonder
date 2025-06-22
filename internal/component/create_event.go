@@ -9,10 +9,10 @@ import (
 )
 
 type CreateEvent struct {
-	MovieRepository *repository.MovieRepository
+	MovieRepository *repository.Movie
 }
 
-func NewCreateEvent(movieRepository *repository.MovieRepository) *CreateEvent {
+func NewCreateEvent(movieRepository *repository.Movie) *CreateEvent {
 	return &CreateEvent{
 		MovieRepository: movieRepository,
 	}

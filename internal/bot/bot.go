@@ -34,7 +34,7 @@ func (b *Bot) Start() error {
 		return err
 	}
 
-	movieRepository := repository.NewMovieRepository(b.DB)
+	movieRepository := repository.NewMovie(b.DB)
 
 	command.RegisterAll(b.Session, b.Config, movieRepository)
 	component.RegisterAll(b.Session, b.Config, movieRepository)

@@ -13,7 +13,7 @@ type Command interface {
 
 var commands = map[string]Command{}
 
-func RegisterAll(s *discordgo.Session, config *config.Config, repository *repository.MovieRepository) {
+func RegisterAll(s *discordgo.Session, config *config.Config, repository *repository.Movie) {
 	commands[commandNameAddMovie] = NewAddMovie(repository)
 	commands[commandNameAllMovies] = NewAllMovies(repository)
 	commands[commandNameSpin] = NewSpin(repository)

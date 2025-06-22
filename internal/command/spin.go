@@ -11,10 +11,10 @@ import (
 )
 
 type Spin struct {
-	MovieRepository *repository.MovieRepository
+	MovieRepository *repository.Movie
 }
 
-func NewSpin(movieRepository *repository.MovieRepository) *Spin {
+func NewSpin(movieRepository *repository.Movie) *Spin {
 	return &Spin{
 		MovieRepository: movieRepository,
 	}

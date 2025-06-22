@@ -9,10 +9,10 @@ import (
 )
 
 type ActiveMovie struct {
-	MovieRepository *repository.MovieRepository
+	MovieRepository *repository.Movie
 }
 
-func NewActiveMovie(movieRepository *repository.MovieRepository) *ActiveMovie {
+func NewActiveMovie(movieRepository *repository.Movie) *ActiveMovie {
 	return &ActiveMovie{
 		MovieRepository: movieRepository,
 	}

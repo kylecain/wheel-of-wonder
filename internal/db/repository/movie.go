@@ -8,17 +8,17 @@ import (
 	"github.com/kylecain/wheel-of-wonder/internal/model"
 )
 
-type MovieRepository struct {
+type Movie struct {
 	db *sql.DB
 }
 
-func NewMovieRepository(db *sql.DB) *MovieRepository {
-	return &MovieRepository{
+func NewMovie(db *sql.DB) *Movie {
+	return &Movie{
 		db: db,
 	}
 }
 
-func (r *MovieRepository) AddMovie(movie *model.Movie) (int64, error) {
+func (r *Movie) AddMovie(movie *model.Movie) (int64, error) {
 	query := " INSERT INTO movies (guild_id, user_id, username, title) VALUES (?, ?, ?, ?)"
 	result, err := r.db.Exec(query, movie.GuildID, movie.UserID, movie.Username, movie.Title)
 
@@ -35,7 +35,7 @@ func (r *MovieRepository) AddMovie(movie *model.Movie) (int64, error) {
 	return id, nil
 }
 
-func (r *MovieRepository) GetMovieByID(movieID int) (*model.Movie, error) {
+func (r *Movie) GetMovieByID(movieID int) (*model.Movie, error) {
 	var movie model.Movie
 
 	query := "SELECT id, guild_id, user_id, username, title, created_at, updated_at FROM movies WHERE id = ?"
@@ -60,7 +60,7 @@ func (r *MovieRepository) GetMovieByID(movieID int) (*model.Movie, error) {
 	return &movie, nil
 }
 
-func (r *MovieRepository) GetAll(guildID string) ([]model.Movie, error) {
+func (r *Movie) GetAll(guildID string) ([]model.Movie, error) {
 	var movies []model.Movie
 
 	query := "SELECT id, guild_id, user_id, username, title, created_at, updated_at FROM movies WHERE guild_id = ? AND watched = 0"
@@ -95,7 +95,7 @@ func (r *MovieRepository) GetAll(guildID string) ([]model.Movie, error) {
 	return movies, nil
 }
 
-func (r *MovieRepository) GetActive(guildID string) (*model.Movie, error) {
+func (r *Movie) GetActive(guildID string) (*model.Movie, error) {
 	var movie model.Movie
 
 	query := "SELECT id, guild_id, user_id, username, title, created_at, updated_at FROM movies WHERE guild_id = ? AND active = 1 LIMIT 1"
@@ -121,7 +121,7 @@ func (r *MovieRepository) GetActive(guildID string) (*model.Movie, error) {
 	return &movie, nil
 }
 
-func (r *MovieRepository) UpdateActive(movieID int, active bool) error {
+func (r *Movie) UpdateActive(movieID int, active bool) error {
 	query := "UPDATE movies SET active = ? WHERE id = ?"
 	_, err := r.db.Exec(query, active, movieID)
 	if err != nil {
@@ -132,7 +132,7 @@ func (r *MovieRepository) UpdateActive(movieID int, active bool) error {
 	return nil
 }
 
-func (r *MovieRepository) UpdateWatched(movieID int, watched bool) error {
+func (r *Movie) UpdateWatched(movieID int, watched bool) error {
 	query := "UPDATE movies SET watched = ? WHERE id = ?"
 	_, err := r.db.Exec(query, watched, movieID)
 	if err != nil {

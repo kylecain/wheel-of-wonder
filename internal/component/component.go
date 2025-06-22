@@ -14,7 +14,7 @@ type Component interface {
 
 var components = map[string]Component{}
 
-func RegisterAll(s *discordgo.Session, config *config.Config, repository *repository.MovieRepository) {
+func RegisterAll(s *discordgo.Session, config *config.Config, repository *repository.Movie) {
 	components[customIdSetActiveMovie] = NewSetActive(repository)
 	components[customIdCreateEvent] = NewCreateEvent(repository)
 	components[customIdCreateEventModal] = NewEventDetails(config)
