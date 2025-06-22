@@ -35,9 +35,10 @@ func (b *Bot) Start() error {
 	}
 
 	movieRepository := repository.NewMovie(b.DB)
+	userRepository := repository.NewUser(b.DB)
 
-	command.RegisterAll(b.Session, b.Config, movieRepository)
-	component.RegisterAll(b.Session, b.Config, movieRepository)
+	command.RegisterAll(b.Session, b.Config, movieRepository, userRepository)
+	component.RegisterAll(b.Session, b.Config, movieRepository, userRepository)
 
 	return nil
 }

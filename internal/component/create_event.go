@@ -22,7 +22,7 @@ func CreateEventButton(movieID, movieTitle string) discordgo.Button {
 	return discordgo.Button{
 		Style:    discordgo.PrimaryButton,
 		Label:    "Create Event",
-		CustomID: fmt.Sprintf("%s:%s:%s", customIdCreateEvent, movieID, movieTitle),
+		CustomID: fmt.Sprintf("%s:%s:%s", CustomIdCreateEvent, movieID, movieTitle),
 	}
 }
 
@@ -33,7 +33,7 @@ func (c *CreateEvent) Handler(s *discordgo.Session, i *discordgo.InteractionCrea
 	err := s.InteractionRespond(i.Interaction, &discordgo.InteractionResponse{
 		Type: discordgo.InteractionResponseModal,
 		Data: &discordgo.InteractionResponseData{
-			CustomID:   fmt.Sprintf("%s:%s:%s", customIdCreateEventModal, movieIDStr, movieTitle),
+			CustomID:   fmt.Sprintf("%s:%s:%s", CustomIdCreateEventModal, movieIDStr, movieTitle),
 			Title:      "Create Event",
 			Components: EventDetailsModal(),
 		},

@@ -14,10 +14,16 @@ type Component interface {
 
 var components = map[string]Component{}
 
-func RegisterAll(s *discordgo.Session, config *config.Config, repository *repository.Movie) {
-	components[customIdSetActiveMovie] = NewSetActive(repository)
-	components[customIdCreateEvent] = NewCreateEvent(repository)
-	components[customIdCreateEventModal] = NewEventDetails(config)
+func RegisterAll(
+	s *discordgo.Session,
+	config *config.Config,
+	movieRepository *repository.Movie,
+	userRepository *repository.User,
+) {
+	components[CustomIdSetActiveMovie] = NewSetActive(movieRepository)
+	components[CustomIdCreateEvent] = NewCreateEvent(movieRepository)
+	components[CustomIdCreateEventModal] = NewEventDetails(config)
+	components[CustomIDSetPreferredTimeModal] = NewSetPreferredEventTime(userRepository)
 
 	s.AddHandler(func(s *discordgo.Session, i *discordgo.InteractionCreate) {
 		var customId string

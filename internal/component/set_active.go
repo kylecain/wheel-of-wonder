@@ -25,7 +25,7 @@ func SetActiveButton(movie model.Movie) discordgo.Button {
 	return discordgo.Button{
 		Style:    discordgo.PrimaryButton,
 		Label:    "Set as Active",
-		CustomID: fmt.Sprintf("%s:%d:%s", customIdSetActiveMovie, movie.ID, movie.Title),
+		CustomID: fmt.Sprintf("%s:%d:%s", CustomIdSetActiveMovie, movie.ID, movie.Title),
 	}
 }
 

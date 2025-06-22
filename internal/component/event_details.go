@@ -41,10 +41,10 @@ func EventDetailsModal() []discordgo.MessageComponent {
 					CustomID:    "time",
 					Label:       "Enter the time of the event (24-hour format)",
 					Style:       discordgo.TextInputShort,
-					Placeholder: "HH:mm:ss",
+					Placeholder: "HH:mm",
 					Required:    true,
-					MaxLength:   8,
-					MinLength:   8,
+					MaxLength:   5,
+					MinLength:   5,
 				},
 			},
 		},
@@ -81,9 +81,9 @@ func (c *EventDetails) Handler(s *discordgo.Session, i *discordgo.InteractionCre
 		InteractionResponseError(s, i, err, "Invalid timezone provided.")
 		return
 	}
-	parsedTime, err := time.ParseInLocation("2006-01-02T15:04:05", fmt.Sprintf("%sT%s", dateInput, timeInput), loc)
+	parsedTime, err := time.ParseInLocation("2006-01-02T15:04", fmt.Sprintf("%sT%s", dateInput, timeInput), loc)
 	if err != nil {
-		InteractionResponseError(s, i, err, "Invalid date or time format. Please use RFC3339 format.")
+		InteractionResponseError(s, i, err, "Invalid date or time format.")
 		return
 	}
 
