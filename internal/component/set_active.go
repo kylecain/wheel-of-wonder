@@ -71,6 +71,7 @@ func (c *SetActive) Handler(s *discordgo.Session, i *discordgo.InteractionCreate
 			Components: []discordgo.MessageComponent{
 				discordgo.ActionsRow{
 					Components: []discordgo.MessageComponent{
+						CreateEventPreferredtimeButton(movieIDStr, movieTitle),
 						CreateEventButton(movieIDStr, movieTitle),
 					},
 				},
