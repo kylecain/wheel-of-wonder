@@ -28,7 +28,7 @@ func RegisterAll(
 	commands[commandNameSetPreferredEventTime] = NewSetPreferredEventTime(userRepository)
 
 	for _, cmd := range commands {
-		s.ApplicationCommandCreate(s.State.User.ID, config.GuildId, cmd.ApplicationCommand())
+		s.ApplicationCommandCreate(s.State.User.ID, config.GuildID, cmd.ApplicationCommand())
 	}
 
 	s.AddHandler(func(s *discordgo.Session, i *discordgo.InteractionCreate) {

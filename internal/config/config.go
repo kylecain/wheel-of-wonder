@@ -10,7 +10,7 @@ import (
 type Config struct {
 	BotToken      string
 	ApplicationID string
-	GuildId       string
+	GuildID       string
 	MigrationUrl  string
 	DatabaseUrl   string
 }
@@ -27,7 +27,7 @@ func NewConfig() *Config {
 
 	return &Config{
 		BotToken:     botToken,
-		GuildId:      guildId,
+		GuildID:      guildId,
 		MigrationUrl: migationUrl,
 		DatabaseUrl:  databaseUrl,
 	}

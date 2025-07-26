@@ -89,7 +89,7 @@ func (c *EventDetails) Handler(s *discordgo.Session, i *discordgo.InteractionCre
 
 	endingTime := parsedTime.Add(2 * time.Hour)
 
-	scheduledEvent, err := s.GuildScheduledEventCreate(c.Config.GuildId, &discordgo.GuildScheduledEventParams{
+	scheduledEvent, err := s.GuildScheduledEventCreate(c.Config.GuildID, &discordgo.GuildScheduledEventParams{
 		Name:               "Wheel of Wonder",
 		Description:        movieTitle,
 		ScheduledStartTime: &parsedTime,

@@ -17,13 +17,13 @@ func main() {
 		os.Exit(1)
 	}
 
-	commands, err := s.ApplicationCommands(config.ApplicationID, config.GuildId)
+	commands, err := s.ApplicationCommands(config.ApplicationID, config.GuildID)
 	if err != nil {
 		slog.Error("error getting commands", "error", err)
 	}
 
 	for _, cmd := range commands {
-		err := s.ApplicationCommandDelete(config.ApplicationID, config.GuildId, cmd.ID)
+		err := s.ApplicationCommandDelete(config.ApplicationID, config.GuildID, cmd.ID)
 		if err != nil {
 			slog.Error("error deleting command", "error", err)
 		}

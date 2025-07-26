@@ -75,7 +75,7 @@ func (c *CreateEventPreferredTime) Handler(s *discordgo.Session, i *discordgo.In
 	targetTime := target.AddDate(0, 0, daysUntil)
 	endingTime := targetTime.Add(2 * time.Hour)
 
-	scheduledEvent, err := s.GuildScheduledEventCreate(c.Config.GuildId, &discordgo.GuildScheduledEventParams{
+	scheduledEvent, err := s.GuildScheduledEventCreate(c.Config.GuildID, &discordgo.GuildScheduledEventParams{
 		Name:               "Wheel of Wonder",
 		Description:        movieTitle,
 		ScheduledStartTime: &targetTime,
