@@ -30,6 +30,7 @@ func (c *SetPreferredEventTime) Handler(s *discordgo.Session, i *discordgo.Inter
 			CustomID:   component.CustomIDSetPreferredTimeModal,
 			Title:      "Set Preferred Time Modal",
 			Components: component.SetPreferredEventTimeModal(),
+			Flags:      discordgo.MessageFlagsEphemeral,
 		},
 	})
 	if err != nil {

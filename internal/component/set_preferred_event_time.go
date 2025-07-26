@@ -121,6 +121,7 @@ func (c *SetPreferredEventTime) Handler(s *discordgo.Session, i *discordgo.Inter
 		Type: discordgo.InteractionResponseChannelMessageWithSource,
 		Data: &discordgo.InteractionResponseData{
 			Content: fmt.Sprintf("Settings Saved:\n- %s, %s, %s", dayOfWeekInput, timeInput, timezoneInput),
+			Flags:   discordgo.MessageFlagsEphemeral,
 		},
 	})
 	if err != nil {

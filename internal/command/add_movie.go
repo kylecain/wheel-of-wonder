@@ -54,6 +54,7 @@ func (c *AddMovie) Handler(s *discordgo.Session, i *discordgo.InteractionCreate)
 		Type: discordgo.InteractionResponseChannelMessageWithSource,
 		Data: &discordgo.InteractionResponseData{
 			Content: fmt.Sprintf("You added: %s", input),
+			Flags:   discordgo.MessageFlagsEphemeral,
 		},
 	})
 	if err != nil {

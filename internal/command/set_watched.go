@@ -46,6 +46,7 @@ func (c *SetWatched) Handler(s *discordgo.Session, i *discordgo.InteractionCreat
 		Type: discordgo.InteractionResponseChannelMessageWithSource,
 		Data: &discordgo.InteractionResponseData{
 			Content: fmt.Sprintf("You set %d as watched", input),
+			Flags:   discordgo.MessageFlagsEphemeral,
 		},
 	})
 	if err != nil {

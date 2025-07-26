@@ -41,6 +41,7 @@ func (c *AllMovies) Handler(s *discordgo.Session, i *discordgo.InteractionCreate
 		Type: discordgo.InteractionResponseChannelMessageWithSource,
 		Data: &discordgo.InteractionResponseData{
 			Content: response,
+			Flags:   discordgo.MessageFlagsEphemeral,
 		},
 	})
 	if err != nil {

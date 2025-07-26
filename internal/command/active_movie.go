@@ -20,7 +20,7 @@ func NewActiveMovie(movieRepository *repository.Movie) *ActiveMovie {
 
 func (c *ActiveMovie) ApplicationCommand() *discordgo.ApplicationCommand {
 	return &discordgo.ApplicationCommand{
-		Name:        commandNameSetActive,
+		Name:        commandNameActiveMovie,
 		Description: "Show the active movie",
 	}
 }
@@ -36,6 +36,7 @@ func (c *ActiveMovie) Handler(s *discordgo.Session, i *discordgo.InteractionCrea
 		Type: discordgo.InteractionResponseChannelMessageWithSource,
 		Data: &discordgo.InteractionResponseData{
 			Content: fmt.Sprintf("The active movie is: %s", activeMovie.Title),
+			Flags:   discordgo.MessageFlagsEphemeral,
 		},
 	})
 	if err != nil {

@@ -46,6 +46,7 @@ func (c *SetActive) Handler(s *discordgo.Session, i *discordgo.InteractionCreate
 		Type: discordgo.InteractionResponseChannelMessageWithSource,
 		Data: &discordgo.InteractionResponseData{
 			Content: fmt.Sprintf("You set %d as active", input),
+			Flags:   discordgo.MessageFlagsEphemeral,
 		},
 	})
 	if err != nil {

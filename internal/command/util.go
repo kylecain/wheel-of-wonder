@@ -13,6 +13,7 @@ func InteractionResponseError(s *discordgo.Session, i *discordgo.InteractionCrea
 		Type: discordgo.InteractionResponseChannelMessageWithSource,
 		Data: &discordgo.InteractionResponseData{
 			Content: message,
+			Flags:   discordgo.MessageFlagsEphemeral,
 		},
 	})
 

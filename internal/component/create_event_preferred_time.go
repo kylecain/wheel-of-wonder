@@ -98,6 +98,7 @@ func (c *CreateEventPreferredTime) Handler(s *discordgo.Session, i *discordgo.In
 		Type: discordgo.InteractionResponseChannelMessageWithSource,
 		Data: &discordgo.InteractionResponseData{
 			Content: fmt.Sprintf("You created an event for %s at %v", movieTitle, target),
+			Flags:   discordgo.MessageFlagsEphemeral,
 		},
 	})
 	if err != nil {

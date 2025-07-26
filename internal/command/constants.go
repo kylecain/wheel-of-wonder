@@ -1,11 +1,11 @@
 package command
 
 const (
-	commandNameActiveMovie           = "activemovie"
-	commandNameAddMovie              = "addmovie"
-	commandNameAllMovies             = "allmovies"
-	commandNameSetActive             = "setactive"
-	commandNameSetWatched            = "setwatched"
-	commandNameSetPreferredEventTime = "setpreferredeventtime"
+	commandNameActiveMovie           = "active-movie"
+	commandNameAddMovie              = "add-movie"
+	commandNameAllMovies             = "all-movies"
+	commandNameSetActive             = "set-active"
+	commandNameSetWatched            = "set-watched"
+	commandNameSetPreferredEventTime = "set-preferred-event-time"
 	commandNameSpin                  = "spin"
 )
