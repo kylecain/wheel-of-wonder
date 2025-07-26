@@ -8,9 +8,24 @@ go run cmd/wheel-of-wonder/main.go
 
 ## Podman
 
+Local Image
+
 ```zsh
-podman build -t wheel-of-wonder .
+podman build -t wheel-of-wonder:local .
 podman run -v $(pwd)/data:/app/data --env-file .env wheel-of-wonder
+```
+
+Remote Image
+
+```zsh
+podman pull ghcr.io/kylecain/wheel-of-wonder:latest
+podman run \
+    -e BOT_TOKEN \
+    -e GUILD_ID \
+    -e MIGRATION_URL \
+    -e DATABASE_URL \
+    -v $(pwd)/data:/app/data \
+    ghcr.io/kylecain/wheel-of-wonder:latest
 ```
 
 ## GHCR
