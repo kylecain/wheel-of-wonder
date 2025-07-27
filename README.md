@@ -13,8 +13,8 @@ Local Image
 ```zsh
 podman build -t wheel-of-wonder:local .
 podman run \
-    -e PUID=$(id -u) \
-    -e PGID=$(id -g) \
+    -e PUID=99 \
+    -e PGID=100 \
     -e UMASK=022 \
     -v $(pwd)/data:/app/data \
     --env-file .env \
@@ -26,8 +26,8 @@ Remote Image
 ```zsh
 podman pull ghcr.io/kylecain/wheel-of-wonder:latest
 podman run \
-    -e PUID=$(id -u) \
-    -e PGID=$(id -g) \
+    -e PUID=99 \
+    -e PGID=100 \
     -e UMASK=022 \
     -e BOT_TOKEN \
     -e GUILD_ID \
