@@ -2,6 +2,7 @@
 
 PUID=${PUID:-1000}
 PGID=${PGID:-1000}
+UMASK=${UMASK:-022}
 
 EXISTING_GROUP=$(getent group "$PGID" | cut -d: -f1)
 if [ -n "$EXISTING_GROUP" ]; then
@@ -20,5 +21,7 @@ else
 fi
 
 chown -R "$PUID:$PGID" /app
+
+umask "$UMASK"
 
 exec su "$USER_NAME" -c "$@"

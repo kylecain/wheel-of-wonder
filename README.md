@@ -15,6 +15,7 @@ podman build -t wheel-of-wonder:local .
 podman run \
     -e PUID=$(id -u) \
     -e PGID=$(id -g) \
+    -e UMASK=022 \
     -v $(pwd)/data:/app/data \
     --env-file .env \
     wheel-of-wonder:local
@@ -27,6 +28,7 @@ podman pull ghcr.io/kylecain/wheel-of-wonder:latest
 podman run \
     -e PUID=$(id -u) \
     -e PGID=$(id -g) \
+    -e UMASK=022 \
     -e BOT_TOKEN \
     -e GUILD_ID \
     -e MIGRATION_URL \
