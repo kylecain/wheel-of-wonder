@@ -45,3 +45,35 @@ echo $CR_PAT | podman login ghcr.io -u kylecain --password-stdin
 podman tag wheel-of-wonder:latest ghcr.io/kylecain/wheel-of-wonder:latest
 podman push ghcr.io/kylecain/wheel-of-wonder:latest
 ```
+
+## Discord
+
+### Installation
+
+Install Link:
+
+* None
+
+### OAuth2
+
+2OAuth2 URL Generator
+Scopes:
+
+* bot
+
+Bot Permissions:
+
+* Use Slash Commands
+* Send Messages
+* Manage Events
+
+Integration Type:
+
+* Guild Install
+
+### Bot
+
+Authorization Flow
+Public Bot:
+
+* False
