@@ -12,7 +12,7 @@ Local Image
 
 ```zsh
 podman build -t wheel-of-wonder:local .
-podman run -v $(pwd)/data:/app/data --env-file .env wheel-of-wonder
+podman run -v $(pwd)/data:/app/data --env-file .env wheel-of-wonder:local
 ```
 
 Remote Image
