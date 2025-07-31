@@ -63,7 +63,7 @@ func (r *Movie) GetMovieByID(movieID int) (*model.Movie, error) {
 func (r *Movie) GetAll(guildID string) ([]model.Movie, error) {
 	var movies []model.Movie
 
-	query := "SELECT id, guild_id, user_id, username, title, created_at, updated_at FROM movies WHERE guild_id = ? AND watched = 0"
+	query := "SELECT id, guild_id, user_id, username, title, created_at, updated_at FROM movies WHERE guild_id = ? AND watched = 0 AND active = 0"
 	rows, err := r.db.Query(query, guildID)
 	if err != nil {
 		return nil, fmt.Errorf("GetAll Error: %v", err)
