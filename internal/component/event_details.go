@@ -115,9 +115,15 @@ func (c *EventDetails) Handler(s *discordgo.Session, i *discordgo.InteractionCre
 			Flags:   discordgo.MessageFlagsEphemeral,
 		},
 	})
-
 	if err != nil {
 		slog.Error("failed to respond to create event modal", "error", err)
 		return
+	}
+
+	eventURL := fmt.Sprintf("https://discord.com/events/%s/%s", c.Config.GuildID, scheduledEvent.ID)
+	generalChannelID := c.Config.GeneralChannelID
+	_, err = s.ChannelMessageSend(generalChannelID, eventURL)
+	if err != nil {
+		slog.Error("Failed to send event link to general chat", "error", err)
 	}
 }
