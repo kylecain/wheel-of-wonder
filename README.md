@@ -41,7 +41,7 @@ podman run \
 ## GHCR
 
 ```zsh
-podman build -t wheel-of-wonder:latest .
+podman build --arch amd64 -t wheel-of-wonder:latest .
 echo $CR_PAT | podman login ghcr.io -u kylecain --password-stdin
 podman tag wheel-of-wonder:latest ghcr.io/kylecain/wheel-of-wonder:latest
 podman push ghcr.io/kylecain/wheel-of-wonder:latest
