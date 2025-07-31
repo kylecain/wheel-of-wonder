@@ -31,6 +31,7 @@ podman run \
     -e UMASK=022 \
     -e BOT_TOKEN \
     -e GUILD_ID \
+    -e GENERAL_CHANNEL_ID \
     -e MIGRATION_URL \
     -e DATABASE_URL \
     -v $(pwd)/data:/app/data \

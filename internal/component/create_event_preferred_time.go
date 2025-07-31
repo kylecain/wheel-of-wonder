@@ -113,4 +113,11 @@ func (c *CreateEventPreferredTime) Handler(s *discordgo.Session, i *discordgo.In
 		InteractionResponseError(s, i, err, "failed to respond to interaction")
 		return
 	}
+
+	eventURL := fmt.Sprintf("https://discord.com/events/%s/%s", c.Config.GuildID, scheduledEvent.ID)
+	generalChannelID := c.Config.GeneralChannelID
+	_, err = s.ChannelMessageSend(generalChannelID, eventURL)
+	if err != nil {
+		slog.Error("Failed to send event link to general chat", "error", err)
+	}
 }
