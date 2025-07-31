@@ -37,6 +37,27 @@ func CreateEventPreferredtimeButton(movieID, movieTitle string) discordgo.Button
 	}
 }
 
+const eventDuration = 2 * time.Hour
+
+func nextPreferredEventTime(now time.Time, preferredDay string, preferredTime time.Time, loc *time.Location) time.Time {
+	dayOfWeekLower := strings.ToLower(preferredDay)
+	weekdayTarget, ok := dayOfWeekMap[dayOfWeekLower]
+	if !ok {
+		weekdayTarget = int(now.Weekday())
+	}
+	daysUntil := (weekdayTarget - int(now.Weekday()) + 7) % 7
+	targetDay := now.AddDate(0, 0, daysUntil)
+	target := time.Date(
+		targetDay.Year(), targetDay.Month(), targetDay.Day(),
+		preferredTime.Hour(), preferredTime.Minute(), 0, 0,
+		loc,
+	)
+	if daysUntil == 0 && now.After(target) {
+		target = target.AddDate(0, 0, 7)
+	}
+	return target
+}
+
 func (c *CreateEventPreferredTime) Handler(s *discordgo.Session, i *discordgo.InteractionCreate) {
 	args := strings.Split(i.MessageComponentData().CustomID, ":")
 	movieTitle := args[2]
@@ -49,7 +70,7 @@ func (c *CreateEventPreferredTime) Handler(s *discordgo.Session, i *discordgo.In
 
 	parsedTime, err := time.Parse("15:04", user.PreferredTimeOfDay)
 	if err != nil {
-		InteractionResponseError(s, i, err, "failed to get parse time")
+		InteractionResponseError(s, i, err, "failed to parse preferred time")
 		return
 	}
 
@@ -60,25 +81,13 @@ func (c *CreateEventPreferredTime) Handler(s *discordgo.Session, i *discordgo.In
 	}
 
 	now := time.Now().In(loc)
-
-	target := time.Date(
-		now.Year(), now.Month(), now.Day(),
-		parsedTime.Hour(), parsedTime.Minute(), 0, 0,
-		loc,
-	)
-
-	daysUntil := (dayOfWeekMap[user.PreferredDayOfWeek] - int(now.Weekday()) + 7) % 7
-	if daysUntil == 0 && now.After(target) {
-		daysUntil = 7
-	}
-
-	targetTime := target.AddDate(0, 0, daysUntil)
-	endingTime := targetTime.Add(2 * time.Hour)
+	target := nextPreferredEventTime(now, user.PreferredDayOfWeek, parsedTime, loc)
+	endingTime := target.Add(eventDuration)
 
 	scheduledEvent, err := s.GuildScheduledEventCreate(c.Config.GuildID, &discordgo.GuildScheduledEventParams{
 		Name:               "Wheel of Wonder",
 		Description:        movieTitle,
-		ScheduledStartTime: &targetTime,
+		ScheduledStartTime: &target,
 		ScheduledEndTime:   &endingTime,
 		EntityType:         discordgo.GuildScheduledEventEntityTypeExternal,
 		EntityMetadata: &discordgo.GuildScheduledEventEntityMetadata{
@@ -86,9 +95,8 @@ func (c *CreateEventPreferredTime) Handler(s *discordgo.Session, i *discordgo.In
 		},
 		PrivacyLevel: discordgo.GuildScheduledEventPrivacyLevelGuildOnly,
 	})
-
 	if err != nil {
-		InteractionResponseError(s, i, err, "Failed to create scheduled event.")
+		InteractionResponseError(s, i, err, "failed to create scheduled event")
 		return
 	}
 
@@ -102,7 +110,7 @@ func (c *CreateEventPreferredTime) Handler(s *discordgo.Session, i *discordgo.In
 		},
 	})
 	if err != nil {
-		InteractionResponseError(s, i, err, "failed to create event modal")
+		InteractionResponseError(s, i, err, "failed to respond to interaction")
 		return
 	}
 }
