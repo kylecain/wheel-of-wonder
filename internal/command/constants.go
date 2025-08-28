@@ -8,4 +8,5 @@ const (
 	commandNameSetWatched            = "set-watched"
 	commandNameSetPreferredEventTime = "set-preferred-event-time"
 	commandNameSpin                  = "spin"
+	commandNameWatchedMovies         = "watched-movies"
 )

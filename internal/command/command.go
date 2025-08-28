@@ -26,6 +26,7 @@ func RegisterAll(
 	commands[commandNameSetActive] = NewSetActive(movieRepository)
 	commands[commandNameSetWatched] = NewSetWatched(movieRepository)
 	commands[commandNameSetPreferredEventTime] = NewSetPreferredEventTime(userRepository)
+	commands[commandNameWatchedMovies] = NewWatchedMovies(movieRepository)
 
 	for _, cmd := range commands {
 		s.ApplicationCommandCreate(s.State.User.ID, config.GuildID, cmd.ApplicationCommand())

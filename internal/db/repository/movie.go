@@ -95,6 +95,41 @@ func (r *Movie) GetAll(guildID string) ([]model.Movie, error) {
 	return movies, nil
 }
 
+func (r *Movie) GetAllWatched(guildID string) ([]model.Movie, error) {
+	var movies []model.Movie
+
+	query := "SELECT id, guild_id, user_id, username, title, created_at, updated_at FROM movies WHERE guild_id = ? AND watched = 1 ORDER BY updated_at DESC"
+	rows, err := r.db.Query(query, guildID)
+	if err != nil {
+		return nil, fmt.Errorf("GetAllWatched Error: %v", err)
+	}
+	defer rows.Close()
+
+	for rows.Next() {
+		var movie model.Movie
+
+		if err := rows.Scan(
+			&movie.ID,
+			&movie.GuildID,
+			&movie.UserID,
+			&movie.Username,
+			&movie.Title,
+			&movie.CreatedAt,
+			&movie.UpdatedAt,
+		); err != nil {
+			return nil, fmt.Errorf("GetAllWatched Error: %v", err)
+		}
+		movies = append(movies, movie)
+	}
+
+	if err := rows.Err(); err != nil {
+		return nil, fmt.Errorf("GetAllWatched Error: %v", err)
+	}
+
+	slog.Info("retrieved all watched movies", "count", len(movies))
+	return movies, nil
+}
+
 func (r *Movie) GetActive(guildID string) (*model.Movie, error) {
 	var movie model.Movie
 
