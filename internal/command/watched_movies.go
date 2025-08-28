@@ -22,7 +22,7 @@ func NewWatchedMovies(movieRepository *repository.Movie) *WatchedMovies {
 func (c *WatchedMovies) ApplicationCommand() *discordgo.ApplicationCommand {
 	return &discordgo.ApplicationCommand{
 		Name:        commandNameWatchedMovies,
-		Description: "Get all previously watched movies",
+		Description: "Get previously watched movies",
 	}
 }
 

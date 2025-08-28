@@ -126,7 +126,7 @@ func (r *Movie) GetAllWatched(guildID string) ([]model.Movie, error) {
 		return nil, fmt.Errorf("GetAllWatched Error: %v", err)
 	}
 
-	slog.Info("retrieved all watched movies", "count", len(movies))
+	slog.Info("retrieved watched movies", "count", len(movies))
 	return movies, nil
 }
 
