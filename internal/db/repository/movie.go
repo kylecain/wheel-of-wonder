@@ -157,7 +157,7 @@ func (r *Movie) GetActive(guildID string) (*model.Movie, error) {
 }
 
 func (r *Movie) UpdateActive(movieID int64, active bool) error {
-	query := "UPDATE movies SET active = ? WHERE id = ?"
+	query := "UPDATE movies SET active = ?, updated_at = CURRENT_TIMESTAMP WHERE id = ?"
 	_, err := r.db.Exec(query, active, movieID)
 	if err != nil {
 		return fmt.Errorf("UpdateActive Error: %v", err)
@@ -168,7 +168,7 @@ func (r *Movie) UpdateActive(movieID int64, active bool) error {
 }
 
 func (r *Movie) UpdateWatched(movieID int64, watched bool) error {
-	query := "UPDATE movies SET watched = ? WHERE id = ?"
+	query := "UPDATE movies SET watched = ?, updated_at = CURRENT_TIMESTAMP WHERE id = ?"
 	_, err := r.db.Exec(query, watched, movieID)
 	if err != nil {
 		return fmt.Errorf("UpdateWatched Error: %v", err)
