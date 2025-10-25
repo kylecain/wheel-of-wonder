@@ -31,7 +31,6 @@ podman run \
     -e UMASK=022 \
     -e BOT_TOKEN \
     -e GUILD_ID \
-    -e GENERAL_CHANNEL_ID \
     -v $(pwd)/data:/app/data \
     ghcr.io/kylecain/wheel-of-wonder:latest
 ```
