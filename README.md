@@ -63,28 +63,28 @@ podman push ghcr.io/kylecain/wheel-of-wonder:latest
 
 Install Link:
 
-* None
+- None
 
 ### OAuth2
 
 2OAuth2 URL Generator
 Scopes:
 
-* bot
+- bot
 
 Bot Permissions:
 
-* Use Slash Commands
-* Send Messages
-* Manage Events
+- Use Slash Commands
+- Send Messages
+- Manage Events
 
 Integration Type:
 
-* Guild Install
+- Guild Install
 
 ### Bot
 
 Authorization Flow
 Public Bot:
 
-* False
+- False
