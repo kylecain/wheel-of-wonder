@@ -14,8 +14,13 @@ import (
 	_ "github.com/mattn/go-sqlite3"
 )
 
+var (
+	migrationUrl = "file://internal/db/migrations"
+	databaseUrl  = "sqlite3://data/db.sqlite3"
+)
+
 func NewDatabase(config *config.Config) *sql.DB {
-	m, err := migrate.New(config.MigrationUrl, config.DatabaseUrl)
+	m, err := migrate.New(migrationUrl, databaseUrl)
 	if err != nil {
 		slog.Error("migration setup failed", "error", err)
 		os.Exit(1)
@@ -29,7 +34,7 @@ func NewDatabase(config *config.Config) *sql.DB {
 
 	slog.Info("migrations applied successfully")
 
-	dbPath := strings.TrimPrefix(config.DatabaseUrl, "sqlite3://")
+	dbPath := strings.TrimPrefix(databaseUrl, "sqlite3://")
 	db, err := sql.Open("sqlite3", dbPath)
 	if err != nil {
 		slog.Error("error creating database", "error", err)
