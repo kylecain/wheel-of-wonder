@@ -89,7 +89,7 @@ func (c *EventDetails) Handler(s *discordgo.Session, i *discordgo.InteractionCre
 
 	endingTime := parsedTime.Add(2 * time.Hour)
 
-	scheduledEvent, err := s.GuildScheduledEventCreate(c.Config.GuildID, &discordgo.GuildScheduledEventParams{
+	scheduledEvent, err := s.GuildScheduledEventCreate(i.GuildID, &discordgo.GuildScheduledEventParams{
 		Name:               "Wheel of Wonder",
 		Description:        movieTitle,
 		ScheduledStartTime: &parsedTime,
@@ -120,7 +120,7 @@ func (c *EventDetails) Handler(s *discordgo.Session, i *discordgo.InteractionCre
 		return
 	}
 
-	eventURL := fmt.Sprintf("https://discord.com/events/%s/%s", c.Config.GuildID, scheduledEvent.ID)
+	eventURL := fmt.Sprintf("https://discord.com/events/%s/%s", i.GuildID, scheduledEvent.ID)
 	_, err = s.ChannelMessageSend(i.ChannelID, eventURL)
 	if err != nil {
 		slog.Error("Failed to send event link to general chat", "error", err)

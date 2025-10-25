@@ -6,6 +6,26 @@
 go run cmd/wheel-of-wonder/main.go 
 ```
 
+## Environment variables
+
+- BOT_TOKEN (required)
+    Discord bot token used to authenticate with the Discord API. Treat this as a secret.
+
+- GUILD_ID (optional)
+    Discord guild (server) ID (snowflake). Used for guild-scoped command registration or to restrict bot operations to a single server. If GUILD_ID is not provided, commands will be registered globally.
+
+- APPLICATION_ID (required for interactions/command registration)
+    Discord application ID (snowflake) for the bot's application. Required when registering slash commands or verifying interactions.
+
+- PUID (optional, default: 99)
+    User ID the process should run as inside a container. When mounting host volumes, ensure the UID exists or file permissions may match.
+
+- PGID (optional, default: 100)
+    Group ID the process should run as inside a container.
+
+- UMASK (optional, default: 022)
+    File-mode creation mask to control default permissions for new files and directories.
+
 ## Podman
 
 Local Image
@@ -13,9 +33,6 @@ Local Image
 ```zsh
 podman build -t wheel-of-wonder:local .
 podman run \
-    -e PUID=99 \
-    -e PGID=100 \
-    -e UMASK=022 \
     -v $(pwd)/data:/app/data \
     --env-file .env \
     wheel-of-wonder:local
@@ -26,11 +43,7 @@ Remote Image
 ```zsh
 podman pull ghcr.io/kylecain/wheel-of-wonder:latest
 podman run \
-    -e PUID=99 \
-    -e PGID=100 \
-    -e UMASK=022 \
     -e BOT_TOKEN \
-    -e GUILD_ID \
     -v $(pwd)/data:/app/data \
     ghcr.io/kylecain/wheel-of-wonder:latest
 ```
