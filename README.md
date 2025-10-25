@@ -51,9 +51,12 @@ podman run \
 ## GHCR
 
 ```zsh
-podman build --arch amd64 -t wheel-of-wonder:latest .
-echo $CR_PAT | podman login ghcr.io -u kylecain --password-stdin
-podman tag wheel-of-wonder:latest ghcr.io/kylecain/wheel-of-wonder:latest
+TAG="$(git rev-parse --short HEAD)"
+podman build --arch amd64 -t wheel-of-wonder:${TAG} .
+echo "$CR_PAT" | podman login ghcr.io -u kylecain --password-stdin
+podman tag wheel-of-wonder:${TAG} ghcr.io/kylecain/wheel-of-wonder:${TAG}
+podman push ghcr.io/kylecain/wheel-of-wonder:${TAG}
+podman tag ghcr.io/kylecain/wheel-of-wonder:${TAG} ghcr.io/kylecain/wheel-of-wonder:latest
 podman push ghcr.io/kylecain/wheel-of-wonder:latest
 ```
 
