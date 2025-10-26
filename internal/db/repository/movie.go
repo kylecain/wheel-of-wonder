@@ -95,6 +95,41 @@ func (r *Movie) GetAll(guildID string) ([]model.Movie, error) {
 	return movies, nil
 }
 
+func (r *Movie) GetAllUnwatched(guildID string) ([]model.Movie, error) {
+	var movies []model.Movie
+
+	query := "SELECT id, guild_id, user_id, username, title, created_at, updated_at FROM movies WHERE guild_id = ? AND watched = 0 ORDER BY updated_at DESC"
+	rows, err := r.db.Query(query, guildID)
+	if err != nil {
+		return nil, fmt.Errorf("GetAllUnwatched Error: %v", err)
+	}
+	defer rows.Close()
+
+	for rows.Next() {
+		var movie model.Movie
+
+		if err := rows.Scan(
+			&movie.ID,
+			&movie.GuildID,
+			&movie.UserID,
+			&movie.Username,
+			&movie.Title,
+			&movie.CreatedAt,
+			&movie.UpdatedAt,
+		); err != nil {
+			return nil, fmt.Errorf("GetAllUnwatched Error: %v", err)
+		}
+		movies = append(movies, movie)
+	}
+
+	if err := rows.Err(); err != nil {
+		return nil, fmt.Errorf("GetAllUnwatched Error: %v", err)
+	}
+
+	slog.Info("retrieved unwatched movies", "count", len(movies))
+	return movies, nil
+}
+
 func (r *Movie) GetAllWatched(guildID string) ([]model.Movie, error) {
 	var movies []model.Movie
 
@@ -175,5 +210,16 @@ func (r *Movie) UpdateWatched(movieID int64, watched bool) error {
 	}
 
 	slog.Info("updated movie watched status", "movie_id", movieID, "watched", watched)
+	return nil
+}
+
+func (r *Movie) DeleteMovie(movieID int64) error {
+	query := "DELETE FROM movies WHERE id = ?"
+	_, err := r.db.Exec(query, movieID)
+	if err != nil {
+		return fmt.Errorf("DeleteMovie Error: %v", err)
+	}
+
+	slog.Info("deleted movie", "movie_id", movieID)
 	return nil
 }

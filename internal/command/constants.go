@@ -2,6 +2,7 @@ package command
 
 const (
 	commandNameActiveMovie           = "active-movie"
+	commandNameDeleteMovie           = "delete-movie"
 	commandNameAddMovie              = "add-movie"
 	commandNameAllMovies             = "all-movies"
 	commandNameSetActive             = "set-active"
