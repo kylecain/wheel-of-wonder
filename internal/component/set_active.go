@@ -75,6 +75,7 @@ func (c *SetActive) Handler(s *discordgo.Session, i *discordgo.InteractionCreate
 
 	components := []discordgo.MessageComponent{
 		CreateEventButton(movieIDStr, movieTitle),
+		AnnounceMovieButton(movieIDStr, movieTitle),
 	}
 
 	user, _ := c.UserRepository.UserByUserId(i.Member.User.ID)

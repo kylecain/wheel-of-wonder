@@ -1,6 +1,7 @@
 package component
 
 const (
+	CustomIdAnnounceMovie            = "announce_movie"
 	CustomIdSetActiveMovie           = "set_active_movie"
 	CustomIdCreateEventModal         = "crate_event_modal"
 	CustomIdCreateEvent              = "create_event"

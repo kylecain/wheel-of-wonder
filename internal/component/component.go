@@ -25,15 +25,17 @@ func RegisterAll(
 	components[CustomIdCreateEventModal] = NewEventDetails(config)
 	components[CustomIDSetPreferredTimeModal] = NewSetPreferredEventTime(userRepository)
 	components[CustomIdCreateEventPreferredTime] = NewCreateEventPreferredTime(movieRepository, userRepository, config)
+	components[CustomIdAnnounceMovie] = NewAnnounceMovie(movieRepository)
 
 	s.AddHandler(func(s *discordgo.Session, i *discordgo.InteractionCreate) {
 		var customId string
 
-		if i.Type == discordgo.InteractionMessageComponent {
+		switch i.Type {
+		case discordgo.InteractionMessageComponent:
 			customId = i.MessageComponentData().CustomID
-		} else if i.Type == discordgo.InteractionModalSubmit {
+		case discordgo.InteractionModalSubmit:
 			customId = i.ModalSubmitData().CustomID
-		} else {
+		default:
 			return
 		}
 
