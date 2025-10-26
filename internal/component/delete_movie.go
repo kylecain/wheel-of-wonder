@@ -1,8 +1,6 @@
 package component
 
 import (
-	"fmt"
-	"log/slog"
 	"strconv"
 
 	"github.com/bwmarrin/discordgo"
@@ -16,36 +14,6 @@ type DeleteMovie struct {
 func NewDeleteMovie(movieRepository *repository.Movie) *DeleteMovie {
 	return &DeleteMovie{
 		MovieRepository: movieRepository,
-	}
-}
-
-func DeleteMovieSelectMenu(movieRepository *repository.Movie, i *discordgo.InteractionCreate) []discordgo.MessageComponent {
-	unwatchedMovies, err := movieRepository.GetAllUnwatched(i.GuildID)
-	if err != nil {
-		slog.Error("Error getting unwatched movies", "error", err)
-	}
-
-	var menuOptions []discordgo.SelectMenuOption
-
-	for _, movie := range unwatchedMovies {
-		option := discordgo.SelectMenuOption{
-			Label:       movie.Title,
-			Value:       fmt.Sprintf("%d", movie.ID),
-			Description: movie.Username,
-		}
-		menuOptions = append(menuOptions, option)
-	}
-
-	menu := discordgo.SelectMenu{
-		CustomID:    CustomIdDeleteMovie,
-		Placeholder: "Select movie from list to delete",
-		Options:     menuOptions,
-	}
-
-	return []discordgo.MessageComponent{
-		discordgo.ActionsRow{
-			Components: []discordgo.MessageComponent{menu},
-		},
 	}
 }
 

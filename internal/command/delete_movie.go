@@ -24,11 +24,17 @@ func (c *DeleteMovie) ApplicationCommand() *discordgo.ApplicationCommand {
 }
 
 func (c *DeleteMovie) Handler(s *discordgo.Session, i *discordgo.InteractionCreate) {
-	err := s.InteractionRespond(i.Interaction, &discordgo.InteractionResponse{
+	movies, err := c.MovieRepository.GetAllUnwatched(i.GuildID)
+	if err != nil {
+		InteractionResponseError(s, i, err, "failed to fetch movies")
+		return
+	}
+
+	err = s.InteractionRespond(i.Interaction, &discordgo.InteractionResponse{
 		Type: discordgo.InteractionResponseChannelMessageWithSource,
 		Data: &discordgo.InteractionResponseData{
 			Content:    "Pick one of the options below:",
-			Components: component.DeleteMovieSelectMenu(c.MovieRepository, i),
+			Components: component.MovieSelectMenu(movies, component.CustomIdDeleteMovie, i),
 			Flags:      discordgo.MessageFlagsEphemeral,
 		},
 	})
