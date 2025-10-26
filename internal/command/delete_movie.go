@@ -25,8 +25,8 @@ func (c *DeleteMovie) ApplicationCommand() *discordgo.ApplicationCommand {
 
 func (c *DeleteMovie) Handler(s *discordgo.Session, i *discordgo.InteractionCreate) {
 	movies, err := c.MovieRepository.GetAllUnwatched(i.GuildID)
-	if err != nil {
-		InteractionResponseError(s, i, err, "failed to fetch movies")
+	if err != nil || len(movies) == 0 {
+		InteractionResponseError(s, i, err, "no unwatched movies available to delete")
 		return
 	}
 
@@ -39,7 +39,7 @@ func (c *DeleteMovie) Handler(s *discordgo.Session, i *discordgo.InteractionCrea
 		},
 	})
 	if err != nil {
-		InteractionResponseError(s, i, err, "failed to create event modal")
+		InteractionResponseError(s, i, err, "failed to create delete movie select menu")
 		return
 	}
 }
