@@ -18,6 +18,50 @@ func NewMovie(db *sql.DB) *Movie {
 	}
 }
 
+const movieSelectCols = "id, guild_id, user_id, username, title, created_at, updated_at"
+
+type scanner interface {
+	Scan(dest ...any) error
+}
+
+func scanMovie(s scanner) (*model.Movie, error) {
+	var m model.Movie
+	if err := s.Scan(
+		&m.ID,
+		&m.GuildID,
+		&m.UserID,
+		&m.Username,
+		&m.Title,
+		&m.CreatedAt,
+		&m.UpdatedAt,
+	); err != nil {
+		return nil, err
+	}
+	return &m, nil
+}
+
+func (r *Movie) getMovies(query string, args ...any) ([]model.Movie, error) {
+	rows, err := r.db.Query(query, args...)
+	if err != nil {
+		return nil, fmt.Errorf("getMovies Error: %v", err)
+	}
+	defer rows.Close()
+
+	var movies []model.Movie
+	for rows.Next() {
+		m, err := scanMovie(rows)
+		if err != nil {
+			return nil, fmt.Errorf("getMovies Error: %v", err)
+		}
+		movies = append(movies, *m)
+	}
+	if err := rows.Err(); err != nil {
+		return nil, fmt.Errorf("getMovies Error: %v", err)
+	}
+	slog.Info("retrieved movies", "count", len(movies))
+	return movies, nil
+}
+
 func (r *Movie) AddMovie(movie *model.Movie) (int64, error) {
 	query := " INSERT INTO movies (guild_id, user_id, username, title) VALUES (?, ?, ?, ?)"
 	result, err := r.db.Exec(query, movie.GuildID, movie.UserID, movie.Username, movie.Title)
@@ -36,159 +80,50 @@ func (r *Movie) AddMovie(movie *model.Movie) (int64, error) {
 }
 
 func (r *Movie) GetMovieByID(movieID int) (*model.Movie, error) {
-	var movie model.Movie
-
-	query := "SELECT id, guild_id, user_id, username, title, created_at, updated_at FROM movies WHERE id = ?"
+	query := fmt.Sprintf("SELECT %s FROM movies WHERE id = ?", movieSelectCols)
 	row := r.db.QueryRow(query, movieID)
 
-	if err := row.Scan(
-		&movie.ID,
-		&movie.GuildID,
-		&movie.UserID,
-		&movie.Username,
-		&movie.Title,
-		&movie.CreatedAt,
-		&movie.UpdatedAt,
-	); err != nil {
+	m, err := scanMovie(row)
+	if err != nil {
 		if err == sql.ErrNoRows {
 			slog.Info("no movie found", "id", movieID)
 			return nil, nil
 		}
 		return nil, fmt.Errorf("GetMovieByID Error: %v", err)
 	}
-	slog.Info("retrieved movie", "id", movie.ID, "title", movie.Title)
-	return &movie, nil
+	slog.Info("retrieved movie", "id", m.ID, "title", m.Title)
+	return m, nil
 }
 
 func (r *Movie) GetAll(guildID string) ([]model.Movie, error) {
-	var movies []model.Movie
-
-	query := "SELECT id, guild_id, user_id, username, title, created_at, updated_at FROM movies WHERE guild_id = ? AND watched = 0 AND active = 0"
-	rows, err := r.db.Query(query, guildID)
-	if err != nil {
-		return nil, fmt.Errorf("GetAll Error: %v", err)
-	}
-	defer rows.Close()
-
-	for rows.Next() {
-		var movie model.Movie
-
-		if err := rows.Scan(
-			&movie.ID,
-			&movie.GuildID,
-			&movie.UserID,
-			&movie.Username,
-			&movie.Title,
-			&movie.CreatedAt,
-			&movie.UpdatedAt,
-		); err != nil {
-			return nil, fmt.Errorf("GetAll Error: %v", err)
-		}
-		movies = append(movies, movie)
-	}
-
-	if err := rows.Err(); err != nil {
-		return nil, fmt.Errorf("GetAll Error: %v", err)
-	}
-
-	slog.Info("retrieved all movies", "count", len(movies))
-	return movies, nil
+	query := fmt.Sprintf("SELECT %s FROM movies WHERE guild_id = ? AND watched = 0 AND active = 0", movieSelectCols)
+	return r.getMovies(query, guildID)
 }
 
 func (r *Movie) GetAllUnwatched(guildID string) ([]model.Movie, error) {
-	var movies []model.Movie
-
-	query := "SELECT id, guild_id, user_id, username, title, created_at, updated_at FROM movies WHERE guild_id = ? AND watched = 0 ORDER BY updated_at DESC"
-	rows, err := r.db.Query(query, guildID)
-	if err != nil {
-		return nil, fmt.Errorf("GetAllUnwatched Error: %v", err)
-	}
-	defer rows.Close()
-
-	for rows.Next() {
-		var movie model.Movie
-
-		if err := rows.Scan(
-			&movie.ID,
-			&movie.GuildID,
-			&movie.UserID,
-			&movie.Username,
-			&movie.Title,
-			&movie.CreatedAt,
-			&movie.UpdatedAt,
-		); err != nil {
-			return nil, fmt.Errorf("GetAllUnwatched Error: %v", err)
-		}
-		movies = append(movies, movie)
-	}
-
-	if err := rows.Err(); err != nil {
-		return nil, fmt.Errorf("GetAllUnwatched Error: %v", err)
-	}
-
-	slog.Info("retrieved unwatched movies", "count", len(movies))
-	return movies, nil
+	query := fmt.Sprintf("SELECT %s FROM movies WHERE guild_id = ? AND watched = 0 AND active = 0 ORDER BY updated_at DESC", movieSelectCols)
+	return r.getMovies(query, guildID)
 }
 
 func (r *Movie) GetAllWatched(guildID string) ([]model.Movie, error) {
-	var movies []model.Movie
-
-	query := "SELECT id, guild_id, user_id, username, title, created_at, updated_at FROM movies WHERE guild_id = ? AND watched = 1 ORDER BY updated_at DESC"
-	rows, err := r.db.Query(query, guildID)
-	if err != nil {
-		return nil, fmt.Errorf("GetAllWatched Error: %v", err)
-	}
-	defer rows.Close()
-
-	for rows.Next() {
-		var movie model.Movie
-
-		if err := rows.Scan(
-			&movie.ID,
-			&movie.GuildID,
-			&movie.UserID,
-			&movie.Username,
-			&movie.Title,
-			&movie.CreatedAt,
-			&movie.UpdatedAt,
-		); err != nil {
-			return nil, fmt.Errorf("GetAllWatched Error: %v", err)
-		}
-		movies = append(movies, movie)
-	}
-
-	if err := rows.Err(); err != nil {
-		return nil, fmt.Errorf("GetAllWatched Error: %v", err)
-	}
-
-	slog.Info("retrieved watched movies", "count", len(movies))
-	return movies, nil
+	query := fmt.Sprintf("SELECT %s FROM movies WHERE guild_id = ? AND watched = 1 ORDER BY updated_at DESC", movieSelectCols)
+	return r.getMovies(query, guildID)
 }
 
 func (r *Movie) GetActive(guildID string) (*model.Movie, error) {
-	var movie model.Movie
-
-	query := "SELECT id, guild_id, user_id, username, title, created_at, updated_at FROM movies WHERE guild_id = ? AND active = 1 LIMIT 1"
+	query := fmt.Sprintf("SELECT %s FROM movies WHERE guild_id = ? AND active = 1 LIMIT 1", movieSelectCols)
 	row := r.db.QueryRow(query, guildID)
 
-	if err := row.Scan(
-		&movie.ID,
-		&movie.GuildID,
-		&movie.UserID,
-		&movie.Username,
-		&movie.Title,
-		&movie.CreatedAt,
-		&movie.UpdatedAt,
-	); err != nil {
+	m, err := scanMovie(row)
+	if err != nil {
 		if err == sql.ErrNoRows {
 			slog.Info("no active movie found", "guild_id", guildID)
 			return nil, nil
 		}
 		return nil, fmt.Errorf("GetActive Error: %v", err)
 	}
-
-	slog.Info("retrieved active movie", "id", movie.ID, "title", movie.Title)
-	return &movie, nil
+	slog.Info("retrieved active movie", "id", m.ID, "title", m.Title)
+	return m, nil
 }
 
 func (r *Movie) UpdateActive(movieID int64, active bool) error {
