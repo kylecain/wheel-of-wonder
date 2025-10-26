@@ -7,25 +7,21 @@ import (
 	"time"
 
 	"github.com/bwmarrin/discordgo"
-	"github.com/kylecain/wheel-of-wonder/internal/config"
 	"github.com/kylecain/wheel-of-wonder/internal/db/repository"
 )
 
 type CreateEventPreferredTime struct {
 	MovieRepository *repository.Movie
 	UserRepository  *repository.User
-	Config          *config.Config
 }
 
 func NewCreateEventPreferredTime(
 	movieRepository *repository.Movie,
 	userRepository *repository.User,
-	config *config.Config,
 ) *CreateEventPreferredTime {
 	return &CreateEventPreferredTime{
 		MovieRepository: movieRepository,
 		UserRepository:  userRepository,
-		Config:          config,
 	}
 }
 

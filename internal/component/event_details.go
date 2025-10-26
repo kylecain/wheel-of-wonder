@@ -7,17 +7,12 @@ import (
 	"time"
 
 	"github.com/bwmarrin/discordgo"
-	"github.com/kylecain/wheel-of-wonder/internal/config"
 )
 
-type EventDetails struct {
-	Config *config.Config
-}
+type EventDetails struct{}
 
-func NewEventDetails(config *config.Config) *EventDetails {
-	return &EventDetails{
-		Config: config,
-	}
+func NewEventDetails() *EventDetails {
+	return &EventDetails{}
 }
 
 func EventDetailsModal() []discordgo.MessageComponent {

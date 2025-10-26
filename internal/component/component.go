@@ -4,7 +4,6 @@ import (
 	"strings"
 
 	"github.com/bwmarrin/discordgo"
-	"github.com/kylecain/wheel-of-wonder/internal/config"
 	"github.com/kylecain/wheel-of-wonder/internal/db/repository"
 )
 
@@ -16,15 +15,14 @@ var components = map[string]Component{}
 
 func RegisterAll(
 	s *discordgo.Session,
-	config *config.Config,
 	movieRepository *repository.Movie,
 	userRepository *repository.User,
 ) {
 	components[CustomIdSetActiveMovie] = NewSetActive(movieRepository, userRepository)
 	components[CustomIdCreateEvent] = NewCreateEvent(movieRepository)
-	components[CustomIdCreateEventModal] = NewEventDetails(config)
+	components[CustomIdCreateEventModal] = NewEventDetails()
 	components[CustomIDSetPreferredTimeModal] = NewSetPreferredEventTime(userRepository)
-	components[CustomIdCreateEventPreferredTime] = NewCreateEventPreferredTime(movieRepository, userRepository, config)
+	components[CustomIdCreateEventPreferredTime] = NewCreateEventPreferredTime(movieRepository, userRepository)
 	components[CustomIdAnnounceMovie] = NewAnnounceMovie(movieRepository)
 	components[CustomIdDeleteMovie] = NewDeleteMovie(movieRepository)
 
