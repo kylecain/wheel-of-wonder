@@ -18,13 +18,13 @@ func RegisterAll(
 	movieRepository *repository.Movie,
 	userRepository *repository.User,
 ) {
-	components[CustomIdSetActiveMovie] = NewSetActive(movieRepository, userRepository)
-	components[CustomIdCreateEvent] = NewCreateEvent(movieRepository)
-	components[CustomIdCreateEventModal] = NewEventDetails()
 	components[CustomIDSetPreferredTimeModal] = NewSetPreferredEventTime(userRepository)
-	components[CustomIdCreateEventPreferredTime] = NewCreateEventPreferredTime(movieRepository, userRepository)
 	components[CustomIdAnnounceMovie] = NewAnnounceMovie(movieRepository)
+	components[CustomIdCreateEventModal] = NewEventDetails()
+	components[CustomIdCreateEventPreferredTime] = NewCreateEventPreferredTime(movieRepository, userRepository)
+	components[CustomIdCreateEvent] = NewCreateEvent(movieRepository)
 	components[CustomIdDeleteMovie] = NewDeleteMovie(movieRepository)
+	components[CustomIdSetActiveMovie] = NewSetActive(movieRepository, userRepository)
 
 	s.AddHandler(func(s *discordgo.Session, i *discordgo.InteractionCreate) {
 		var customId string

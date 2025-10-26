@@ -19,15 +19,13 @@ func RegisterAll(
 	movieRepository *repository.Movie,
 	userRepository *repository.User,
 ) {
+	commands[commandNameActiveMovie] = NewActiveMovie(movieRepository)
 	commands[commandNameAddMovie] = NewAddMovie(movieRepository)
 	commands[commandNameAllMovies] = NewAllMovies(movieRepository)
-	commands[commandNameSpin] = NewSpin(movieRepository)
-	commands[commandNameActiveMovie] = NewActiveMovie(movieRepository)
-	commands[commandNameSetActive] = NewSetActive(movieRepository)
-	commands[commandNameSetWatched] = NewSetWatched(movieRepository)
-	commands[commandNameSetPreferredEventTime] = NewSetPreferredEventTime(userRepository)
-	commands[commandNameWatchedMovies] = NewWatchedMovies(movieRepository)
 	commands[commandNameDeleteMovie] = NewDeleteMovie(movieRepository)
+	commands[commandNameSetPreferredEventTime] = NewSetPreferredEventTime(userRepository)
+	commands[commandNameSpin] = NewSpin(movieRepository)
+	commands[commandNameWatchedMovies] = NewWatchedMovies(movieRepository)
 
 	for _, cmd := range commands {
 		s.ApplicationCommandCreate(s.State.User.ID, config.GuildID, cmd.ApplicationCommand())
