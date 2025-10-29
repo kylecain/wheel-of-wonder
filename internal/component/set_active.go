@@ -9,6 +9,7 @@ import (
 	"github.com/bwmarrin/discordgo"
 	"github.com/kylecain/wheel-of-wonder/internal/db/repository"
 	"github.com/kylecain/wheel-of-wonder/internal/model"
+	"github.com/kylecain/wheel-of-wonder/internal/util"
 )
 
 type SetActive struct {
@@ -37,39 +38,39 @@ func (c *SetActive) Handler(s *discordgo.Session, i *discordgo.InteractionCreate
 
 	movieID, err := strconv.Atoi(movieIDStr)
 	if err != nil {
-		InteractionResponseError(s, i, err, "Failed to convert movieID")
+		util.InteractionResponseError(s, i, err, "Failed to convert movieID")
 		return
 	}
 
 	currentlyActiveMovie, err := c.MovieRepository.GetActive(i.GuildID)
 	if err != nil {
-		InteractionResponseError(s, i, err, "failed to get currently active movie")
+		util.InteractionResponseError(s, i, err, "failed to get currently active movie")
 		return
 	}
 
 	if currentlyActiveMovie != nil {
 		err = c.MovieRepository.UpdateActive(currentlyActiveMovie.ID, false)
 		if err != nil {
-			InteractionResponseError(s, i, err, "failed to update currently active movie")
+			util.InteractionResponseError(s, i, err, "failed to update currently active movie")
 			return
 		}
 
 		err = c.MovieRepository.UpdateWatched(currentlyActiveMovie.ID, true)
 		if err != nil {
-			InteractionResponseError(s, i, err, "failed to update previous movie to watched")
+			util.InteractionResponseError(s, i, err, "failed to update previous movie to watched")
 			return
 		}
 	}
 
 	err = c.MovieRepository.UpdateActive(int64(movieID), true)
 	if err != nil {
-		InteractionResponseError(s, i, err, "failed to update currently active movie")
+		util.InteractionResponseError(s, i, err, "failed to update currently active movie")
 		return
 	}
 
 	activeMovie, err := c.MovieRepository.GetMovieByID(movieID)
 	if err != nil || activeMovie == nil {
-		InteractionResponseError(s, i, err, "failed to retrieve active movie")
+		util.InteractionResponseError(s, i, err, "failed to retrieve active movie")
 		return
 	}
 

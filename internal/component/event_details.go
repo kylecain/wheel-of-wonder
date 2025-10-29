@@ -7,6 +7,7 @@ import (
 	"time"
 
 	"github.com/bwmarrin/discordgo"
+	"github.com/kylecain/wheel-of-wonder/internal/util"
 )
 
 type EventDetails struct{}
@@ -73,12 +74,12 @@ func (c *EventDetails) Handler(s *discordgo.Session, i *discordgo.InteractionCre
 
 	loc, err := time.LoadLocation(timezoneInput)
 	if err != nil {
-		InteractionResponseError(s, i, err, "Invalid timezone provided.")
+		util.InteractionResponseError(s, i, err, "Invalid timezone provided.")
 		return
 	}
 	parsedTime, err := time.ParseInLocation("2006-01-02T15:04", fmt.Sprintf("%sT%s", dateInput, timeInput), loc)
 	if err != nil {
-		InteractionResponseError(s, i, err, "Invalid date or time format.")
+		util.InteractionResponseError(s, i, err, "Invalid date or time format.")
 		return
 	}
 
@@ -97,7 +98,7 @@ func (c *EventDetails) Handler(s *discordgo.Session, i *discordgo.InteractionCre
 	})
 
 	if err != nil {
-		InteractionResponseError(s, i, err, "Failed to create scheduled event.")
+		util.InteractionResponseError(s, i, err, "Failed to create scheduled event.")
 		return
 	}
 

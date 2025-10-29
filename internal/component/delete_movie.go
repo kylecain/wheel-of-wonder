@@ -5,6 +5,7 @@ import (
 
 	"github.com/bwmarrin/discordgo"
 	"github.com/kylecain/wheel-of-wonder/internal/db/repository"
+	"github.com/kylecain/wheel-of-wonder/internal/util"
 )
 
 type DeleteMovie struct {
@@ -21,7 +22,7 @@ func (c *DeleteMovie) Handler(s *discordgo.Session, i *discordgo.InteractionCrea
 	selected := i.MessageComponentData().Values[0]
 	movieId, err := strconv.Atoi(selected)
 	if err != nil {
-		InteractionResponseError(s, i, err, "failed to convert movie ID")
+		util.InteractionResponseError(s, i, err, "failed to convert movie ID")
 		return
 	}
 	c.MovieRepository.DeleteMovie(int64(movieId))
@@ -35,7 +36,7 @@ func (c *DeleteMovie) Handler(s *discordgo.Session, i *discordgo.InteractionCrea
 		},
 	})
 	if err != nil {
-		InteractionResponseError(s, i, err, "failed to create event modal")
+		util.InteractionResponseError(s, i, err, "failed to create event modal")
 		return
 	}
 }

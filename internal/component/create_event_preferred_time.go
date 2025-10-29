@@ -8,6 +8,7 @@ import (
 
 	"github.com/bwmarrin/discordgo"
 	"github.com/kylecain/wheel-of-wonder/internal/db/repository"
+	"github.com/kylecain/wheel-of-wonder/internal/util"
 )
 
 type CreateEventPreferredTime struct {
@@ -60,19 +61,19 @@ func (c *CreateEventPreferredTime) Handler(s *discordgo.Session, i *discordgo.In
 
 	user, err := c.UserRepository.UserByUserId(i.Member.User.ID)
 	if err != nil {
-		InteractionResponseError(s, i, err, "failed to get user settings")
+		util.InteractionResponseError(s, i, err, "failed to get user settings")
 		return
 	}
 
 	parsedTime, err := time.Parse("15:04", user.PreferredTimeOfDay)
 	if err != nil {
-		InteractionResponseError(s, i, err, "failed to parse preferred time")
+		util.InteractionResponseError(s, i, err, "failed to parse preferred time")
 		return
 	}
 
 	loc, err := time.LoadLocation(user.PreferredTimezone)
 	if err != nil {
-		InteractionResponseError(s, i, err, "failed to load timezone")
+		util.InteractionResponseError(s, i, err, "failed to load timezone")
 		return
 	}
 
@@ -92,7 +93,7 @@ func (c *CreateEventPreferredTime) Handler(s *discordgo.Session, i *discordgo.In
 		PrivacyLevel: discordgo.GuildScheduledEventPrivacyLevelGuildOnly,
 	})
 	if err != nil {
-		InteractionResponseError(s, i, err, "failed to create scheduled event")
+		util.InteractionResponseError(s, i, err, "failed to create scheduled event")
 		return
 	}
 
@@ -106,7 +107,7 @@ func (c *CreateEventPreferredTime) Handler(s *discordgo.Session, i *discordgo.In
 		},
 	})
 	if err != nil {
-		InteractionResponseError(s, i, err, "failed to respond to interaction")
+		util.InteractionResponseError(s, i, err, "failed to respond to interaction")
 		return
 	}
 

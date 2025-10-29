@@ -8,6 +8,7 @@ import (
 	"github.com/bwmarrin/discordgo"
 	"github.com/kylecain/wheel-of-wonder/internal/component"
 	"github.com/kylecain/wheel-of-wonder/internal/db/repository"
+	"github.com/kylecain/wheel-of-wonder/internal/util"
 )
 
 type Spin struct {
@@ -30,7 +31,7 @@ func (c *Spin) ApplicationCommand() *discordgo.ApplicationCommand {
 func (c *Spin) Handler(s *discordgo.Session, i *discordgo.InteractionCreate) {
 	movies, err := c.MovieRepository.GetAll(i.GuildID)
 	if err != nil || len(movies) == 0 {
-		InteractionResponseError(s, i, err, "failed to get all movies for spin")
+		util.InteractionResponseError(s, i, err, "failed to get all movies for spin")
 		return
 	}
 

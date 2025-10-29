@@ -6,6 +6,7 @@ import (
 
 	"github.com/bwmarrin/discordgo"
 	"github.com/kylecain/wheel-of-wonder/internal/db/repository"
+	"github.com/kylecain/wheel-of-wonder/internal/util"
 )
 
 type CreateEvent struct {
@@ -39,7 +40,7 @@ func (c *CreateEvent) Handler(s *discordgo.Session, i *discordgo.InteractionCrea
 		},
 	})
 	if err != nil {
-		InteractionResponseError(s, i, err, "failed to create event modal")
+		util.InteractionResponseError(s, i, err, "failed to create event modal")
 		return
 	}
 }

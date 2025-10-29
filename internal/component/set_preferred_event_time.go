@@ -9,6 +9,7 @@ import (
 	"github.com/bwmarrin/discordgo"
 	"github.com/kylecain/wheel-of-wonder/internal/db/repository"
 	"github.com/kylecain/wheel-of-wonder/internal/model"
+	"github.com/kylecain/wheel-of-wonder/internal/util"
 )
 
 var dayOfWeekMap = map[string]int{
@@ -87,19 +88,19 @@ func (c *SetPreferredEventTime) Handler(s *discordgo.Session, i *discordgo.Inter
 	_, ok := dayOfWeekMap[dayOfWeekInputLower]
 
 	if !ok {
-		InteractionResponseError(s, i, fmt.Errorf("invalid day"), "Invalid day")
+		util.InteractionResponseError(s, i, fmt.Errorf("invalid day"), "Invalid day")
 		return
 	}
 
 	_, err := time.Parse("15:04", timeInput)
 	if err != nil {
-		InteractionResponseError(s, i, err, "Invalid time provided.")
+		util.InteractionResponseError(s, i, err, "Invalid time provided.")
 		return
 	}
 
 	_, err = time.LoadLocation(timezoneInput)
 	if err != nil {
-		InteractionResponseError(s, i, err, "Invalid timezone provided.")
+		util.InteractionResponseError(s, i, err, "Invalid timezone provided.")
 		return
 	}
 
@@ -113,7 +114,7 @@ func (c *SetPreferredEventTime) Handler(s *discordgo.Session, i *discordgo.Inter
 
 	_, err = c.UserRepository.AddUser(user)
 	if err != nil {
-		InteractionResponseError(s, i, err, "Error saving settings")
+		util.InteractionResponseError(s, i, err, "Error saving settings")
 		return
 	}
 

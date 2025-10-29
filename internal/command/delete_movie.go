@@ -4,6 +4,7 @@ import (
 	"github.com/bwmarrin/discordgo"
 	"github.com/kylecain/wheel-of-wonder/internal/component"
 	"github.com/kylecain/wheel-of-wonder/internal/db/repository"
+	"github.com/kylecain/wheel-of-wonder/internal/util"
 )
 
 type DeleteMovie struct {
@@ -26,7 +27,7 @@ func (c *DeleteMovie) ApplicationCommand() *discordgo.ApplicationCommand {
 func (c *DeleteMovie) Handler(s *discordgo.Session, i *discordgo.InteractionCreate) {
 	movies, err := c.MovieRepository.GetAllUnwatched(i.GuildID)
 	if err != nil || len(movies) == 0 {
-		InteractionResponseError(s, i, err, "no unwatched movies available to delete")
+		util.InteractionResponseError(s, i, err, "no unwatched movies available to delete")
 		return
 	}
 
@@ -39,7 +40,7 @@ func (c *DeleteMovie) Handler(s *discordgo.Session, i *discordgo.InteractionCrea
 		},
 	})
 	if err != nil {
-		InteractionResponseError(s, i, err, "failed to create delete movie select menu")
+		util.InteractionResponseError(s, i, err, "failed to create delete movie select menu")
 		return
 	}
 }

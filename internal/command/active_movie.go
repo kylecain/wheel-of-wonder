@@ -6,6 +6,7 @@ import (
 
 	"github.com/bwmarrin/discordgo"
 	"github.com/kylecain/wheel-of-wonder/internal/db/repository"
+	"github.com/kylecain/wheel-of-wonder/internal/util"
 )
 
 type ActiveMovie struct {
@@ -28,7 +29,7 @@ func (c *ActiveMovie) ApplicationCommand() *discordgo.ApplicationCommand {
 func (c *ActiveMovie) Handler(s *discordgo.Session, i *discordgo.InteractionCreate) {
 	activeMovie, err := c.MovieRepository.GetActive(i.GuildID)
 	if err != nil || activeMovie == nil {
-		InteractionResponseError(s, i, err, "Failed to retrieve active movie.")
+		util.InteractionResponseError(s, i, err, "Failed to retrieve active movie.")
 		return
 	}
 

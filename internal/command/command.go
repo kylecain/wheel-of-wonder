@@ -4,6 +4,7 @@ import (
 	"github.com/bwmarrin/discordgo"
 	"github.com/kylecain/wheel-of-wonder/internal/config"
 	"github.com/kylecain/wheel-of-wonder/internal/db/repository"
+	"github.com/kylecain/wheel-of-wonder/internal/service"
 )
 
 type Command interface {
@@ -18,9 +19,10 @@ func RegisterAll(
 	config *config.Config,
 	movieRepository *repository.Movie,
 	userRepository *repository.User,
+	movieSearchService *service.MovieSearch,
 ) {
 	commands[commandNameActiveMovie] = NewActiveMovie(movieRepository)
-	commands[commandNameAddMovie] = NewAddMovie(movieRepository)
+	commands[commandNameAddMovie] = NewAddMovie(movieRepository, movieSearchService)
 	commands[commandNameAllMovies] = NewAllMovies(movieRepository)
 	commands[commandNameDeleteMovie] = NewDeleteMovie(movieRepository)
 	commands[commandNameSetPreferredEventTime] = NewSetPreferredEventTime(userRepository)

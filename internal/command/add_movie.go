@@ -1,21 +1,24 @@
 package command
 
 import (
-	"fmt"
 	"log/slog"
 
 	"github.com/bwmarrin/discordgo"
 	"github.com/kylecain/wheel-of-wonder/internal/db/repository"
 	"github.com/kylecain/wheel-of-wonder/internal/model"
+	"github.com/kylecain/wheel-of-wonder/internal/service"
+	"github.com/kylecain/wheel-of-wonder/internal/util"
 )
 
 type AddMovie struct {
-	MovieRepository *repository.Movie
+	MovieRepository    *repository.Movie
+	SearchMovieService *service.MovieSearch
 }
 
-func NewAddMovie(movieRepository *repository.Movie) *AddMovie {
+func NewAddMovie(movieRepository *repository.Movie, searchMovieService *service.MovieSearch) *AddMovie {
 	return &AddMovie{
-		MovieRepository: movieRepository,
+		MovieRepository:    movieRepository,
+		SearchMovieService: searchMovieService,
 	}
 }
 
@@ -37,24 +40,33 @@ func (c *AddMovie) ApplicationCommand() *discordgo.ApplicationCommand {
 func (c *AddMovie) Handler(s *discordgo.Session, i *discordgo.InteractionCreate) {
 	input := i.ApplicationCommandData().Options[0].StringValue()
 
-	movie := &model.Movie{
-		GuildID:  i.GuildID,
-		UserID:   i.Member.User.ID,
-		Username: i.Member.User.Username,
-		Title:    input,
+	movieInfo, err := c.SearchMovieService.FetchMovie(input)
+	if err != nil {
+		util.InteractionResponseError(s, i, err, "Failed to fetch movie info.")
+		return
 	}
 
-	_, err := c.MovieRepository.AddMovie(movie)
+	movie := &model.Movie{
+		GuildID:     i.GuildID,
+		UserID:      i.Member.User.ID,
+		Username:    i.Member.User.Username,
+		Title:       movieInfo.Title,
+		Description: movieInfo.Description,
+		ImageURL:    movieInfo.ImageURL,
+		ContentURL:  movieInfo.ContentURL,
+	}
+
+	_, err = c.MovieRepository.AddMovie(movie)
 	if err != nil {
-		InteractionResponseError(s, i, err, "Failed to add movie.")
+		util.InteractionResponseError(s, i, err, "Failed to add movie.")
 		return
 	}
 
 	err = s.InteractionRespond(i.Interaction, &discordgo.InteractionResponse{
 		Type: discordgo.InteractionResponseChannelMessageWithSource,
 		Data: &discordgo.InteractionResponseData{
-			Content: fmt.Sprintf("You added: %s", input),
-			Flags:   discordgo.MessageFlagsEphemeral,
+			Embeds: []*discordgo.MessageEmbed{util.MovieEmbed(movie)},
+			Flags:  discordgo.MessageFlagsEphemeral,
 		},
 	})
 	if err != nil {

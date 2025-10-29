@@ -7,6 +7,7 @@ import (
 
 	"github.com/bwmarrin/discordgo"
 	"github.com/kylecain/wheel-of-wonder/internal/db/repository"
+	"github.com/kylecain/wheel-of-wonder/internal/util"
 )
 
 type WatchedMovies struct {
@@ -29,7 +30,7 @@ func (c *WatchedMovies) ApplicationCommand() *discordgo.ApplicationCommand {
 func (c *WatchedMovies) Handler(s *discordgo.Session, i *discordgo.InteractionCreate) {
 	movies, err := c.MovieRepository.GetAllWatched(i.GuildID)
 	if err != nil {
-		InteractionResponseError(s, i, err, "Failed to get watched movies.")
+		util.InteractionResponseError(s, i, err, "Failed to get watched movies.")
 		return
 	}
 

@@ -2,12 +2,14 @@ package bot
 
 import (
 	"database/sql"
+	"net/http"
 
 	"github.com/bwmarrin/discordgo"
 	"github.com/kylecain/wheel-of-wonder/internal/command"
 	"github.com/kylecain/wheel-of-wonder/internal/component"
 	"github.com/kylecain/wheel-of-wonder/internal/config"
 	"github.com/kylecain/wheel-of-wonder/internal/db/repository"
+	"github.com/kylecain/wheel-of-wonder/internal/service"
 )
 
 type Bot struct {
@@ -37,7 +39,9 @@ func (b *Bot) Start() error {
 	movieRepository := repository.NewMovie(b.DB)
 	userRepository := repository.NewUser(b.DB)
 
-	command.RegisterAll(b.Session, b.Config, movieRepository, userRepository)
+	searchMovieService := service.NewMovieSearch(http.DefaultClient)
+
+	command.RegisterAll(b.Session, b.Config, movieRepository, userRepository, searchMovieService)
 	component.RegisterAll(b.Session, movieRepository, userRepository)
 
 	return nil
