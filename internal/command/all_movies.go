@@ -34,31 +34,24 @@ func (c *AllMovies) Handler(s *discordgo.Session, i *discordgo.InteractionCreate
 		return
 	}
 
-	maxIDLen := len("ID")
-	maxTitleLen := len("Movie")
+	var b strings.Builder
 	for _, movie := range movies {
-		idLen := len(fmt.Sprintf("%d", movie.ID))
-		if idLen > maxIDLen {
-			maxIDLen = idLen
-		}
-		if len(movie.Title) > maxTitleLen {
-			maxTitleLen = len(movie.Title)
-		}
+		b.WriteString(fmt.Sprintf("**%s** — %s\n", movie.Title, movie.Username))
 	}
 
-	response := "```" +
-		fmt.Sprintf("| %-*s | %-*s |\n", maxIDLen, "ID", maxTitleLen, "Movie") +
-		fmt.Sprintf("|%s|%s|\n", strings.Repeat("-", maxIDLen+2), strings.Repeat("-", maxTitleLen+2))
-	for _, movie := range movies {
-		response += fmt.Sprintf("| %-*d | %-*s |\n", maxIDLen, movie.ID, maxTitleLen, movie.Title)
+	embed := &discordgo.MessageEmbed{
+		Title:       "All Movies",
+		Description: b.String(),
+		Footer: &discordgo.MessageEmbedFooter{
+			Text: fmt.Sprintf("%d movies", len(movies)),
+		},
 	}
-	response += "```"
 
 	err = s.InteractionRespond(i.Interaction, &discordgo.InteractionResponse{
 		Type: discordgo.InteractionResponseChannelMessageWithSource,
 		Data: &discordgo.InteractionResponseData{
-			Content: response,
-			Flags:   discordgo.MessageFlagsEphemeral,
+			Embeds: []*discordgo.MessageEmbed{embed},
+			Flags:  discordgo.MessageFlagsEphemeral,
 		},
 	})
 	if err != nil {
