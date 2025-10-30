@@ -76,7 +76,10 @@ func (c *Spin) createComponents(movie *model.Movie, i *discordgo.InteractionCrea
 			components...,
 		)
 	}
-	return components
+	actionsRow := discordgo.ActionsRow{
+		Components: components,
+	}
+	return []discordgo.MessageComponent{actionsRow}
 }
 
 func (c *Spin) setActive(movie *model.Movie, i *discordgo.InteractionCreate) error {
