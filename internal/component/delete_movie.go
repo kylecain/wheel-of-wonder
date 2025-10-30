@@ -1,6 +1,7 @@
 package component
 
 import (
+	"log/slog"
 	"strconv"
 
 	"github.com/bwmarrin/discordgo"
@@ -25,18 +26,20 @@ func (c *DeleteMovie) Handler(s *discordgo.Session, i *discordgo.InteractionCrea
 		util.InteractionResponseError(s, i, err, "failed to convert movie ID")
 		return
 	}
-	c.MovieRepository.DeleteMovie(int64(movieId))
+
+	err = c.MovieRepository.DeleteMovie(int64(movieId))
+	if err != nil {
+		util.InteractionResponseError(s, i, err, "Failed to delete movie")
+	}
 
 	err = s.InteractionRespond(i.Interaction, &discordgo.InteractionResponse{
 		Type: discordgo.InteractionResponseUpdateMessage,
 		Data: &discordgo.InteractionResponseData{
-			Content:    "Movie deleted successfully.",
-			Components: []discordgo.MessageComponent{},
-			Flags:      discordgo.MessageFlagsEphemeral,
+			Content: "Movie deleted successfully.",
+			Flags:   discordgo.MessageFlagsEphemeral,
 		},
 	})
 	if err != nil {
-		util.InteractionResponseError(s, i, err, "failed to create event modal")
-		return
+		slog.Error("Failed to update user on deleted movie", "error", err)
 	}
 }

@@ -116,7 +116,7 @@ func (c *CreateEventPreferredTime) Handler(s *discordgo.Session, i *discordgo.In
 		PrivacyLevel: discordgo.GuildScheduledEventPrivacyLevelGuildOnly,
 	})
 	if err != nil {
-		util.InteractionResponseError(s, i, err, "failed to create scheduled event")
+		slog.Error("Failed to create schedule event", "error", err)
 		return
 	}
 
@@ -130,7 +130,7 @@ func (c *CreateEventPreferredTime) Handler(s *discordgo.Session, i *discordgo.In
 		},
 	})
 	if err != nil {
-		util.InteractionResponseError(s, i, err, "failed to respond to interaction")
+		slog.Error("Failed to update user on scheduled event", "error", err)
 		return
 	}
 

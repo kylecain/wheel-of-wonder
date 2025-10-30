@@ -1,6 +1,8 @@
 package command
 
 import (
+	"log/slog"
+
 	"github.com/bwmarrin/discordgo"
 	"github.com/kylecain/wheel-of-wonder/internal/db/repository"
 	"github.com/kylecain/wheel-of-wonder/internal/model"
@@ -68,6 +70,6 @@ func (c *AddMovie) Handler(s *discordgo.Session, i *discordgo.InteractionCreate)
 		},
 	})
 	if err != nil {
-		util.InteractionResponseError(s, i, err, "Failed to respond to add command")
+		slog.Error("Failed to respond to add-movie command", "error", err)
 	}
 }

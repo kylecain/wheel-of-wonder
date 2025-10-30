@@ -56,6 +56,6 @@ func (c *WatchedMovies) Handler(s *discordgo.Session, i *discordgo.InteractionCr
 		},
 	})
 	if err != nil {
-		slog.Error("failed to respond to watched movies command", "error", err)
+		slog.Error("Failed to respond to watched movies command", "error", err)
 	}
 }

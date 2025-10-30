@@ -55,6 +55,6 @@ func (c *AllMovies) Handler(s *discordgo.Session, i *discordgo.InteractionCreate
 		},
 	})
 	if err != nil {
-		slog.Error("failed to respond to getall command", "error", err)
+		slog.Error("Failed to respond to all-movies command", "error", err)
 	}
 }

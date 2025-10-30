@@ -1,6 +1,7 @@
 package command
 
 import (
+	"log/slog"
 	"math/rand"
 	"strconv"
 
@@ -55,7 +56,7 @@ func (c *Spin) Handler(s *discordgo.Session, i *discordgo.InteractionCreate) {
 	})
 
 	if err != nil {
-		util.InteractionResponseError(s, i, err, "failed to respond to spin command")
+		slog.Error("Failed to respond to spin command", "error", err)
 	}
 }
 

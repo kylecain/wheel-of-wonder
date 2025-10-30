@@ -139,7 +139,7 @@ func (c *EventDetails) Handler(s *discordgo.Session, i *discordgo.InteractionCre
 		},
 	})
 	if err != nil {
-		slog.Error("failed to respond to create event modal", "error", err)
+		slog.Error("Failed to respond to create event modal", "error", err)
 		return
 	}
 

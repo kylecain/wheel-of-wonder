@@ -126,6 +126,6 @@ func (c *SetPreferredEventTime) Handler(s *discordgo.Session, i *discordgo.Inter
 		},
 	})
 	if err != nil {
-		slog.Error("failed to respond to add command", "error", err)
+		slog.Error("Failed to respond to saving preferred event time", "error", err)
 	}
 }

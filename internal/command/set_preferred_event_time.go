@@ -1,10 +1,11 @@
 package command
 
 import (
+	"log/slog"
+
 	"github.com/bwmarrin/discordgo"
 	"github.com/kylecain/wheel-of-wonder/internal/component"
 	"github.com/kylecain/wheel-of-wonder/internal/db/repository"
-	"github.com/kylecain/wheel-of-wonder/internal/util"
 )
 
 type SetPreferredEventTime struct {
@@ -35,7 +36,6 @@ func (c *SetPreferredEventTime) Handler(s *discordgo.Session, i *discordgo.Inter
 		},
 	})
 	if err != nil {
-		util.InteractionResponseError(s, i, err, "failed to create event modal")
-		return
+		slog.Error("Failed to respond to set-preferred-event-time command", "error", err)
 	}
 }

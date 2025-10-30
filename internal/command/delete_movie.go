@@ -1,6 +1,8 @@
 package command
 
 import (
+	"log/slog"
+
 	"github.com/bwmarrin/discordgo"
 	"github.com/kylecain/wheel-of-wonder/internal/component"
 	"github.com/kylecain/wheel-of-wonder/internal/db/repository"
@@ -27,7 +29,7 @@ func (c *DeleteMovie) ApplicationCommand() *discordgo.ApplicationCommand {
 func (c *DeleteMovie) Handler(s *discordgo.Session, i *discordgo.InteractionCreate) {
 	movies, err := c.MovieRepository.GetAllUnwatched(i.GuildID)
 	if err != nil || len(movies) == 0 {
-		util.InteractionResponseError(s, i, err, "no unwatched movies available to delete")
+		util.InteractionResponseError(s, i, err, "No unwatched movies available to delete")
 		return
 	}
 
@@ -40,7 +42,6 @@ func (c *DeleteMovie) Handler(s *discordgo.Session, i *discordgo.InteractionCrea
 		},
 	})
 	if err != nil {
-		util.InteractionResponseError(s, i, err, "failed to create delete movie select menu")
-		return
+		slog.Error("Failed to respond to delete-movie command", "error", err)
 	}
 }
