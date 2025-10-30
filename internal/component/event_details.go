@@ -3,25 +3,25 @@ package component
 import (
 	"fmt"
 	"log/slog"
-	"net/http"
 	"strconv"
 	"strings"
 	"time"
 
 	"github.com/bwmarrin/discordgo"
 	"github.com/kylecain/wheel-of-wonder/internal/db/repository"
+	"github.com/kylecain/wheel-of-wonder/internal/service"
 	"github.com/kylecain/wheel-of-wonder/internal/util"
 )
 
 type EventDetails struct {
 	MovieRepository *repository.Movie
-	HttpClient      *http.Client
+	MovieService    *service.Movie
 }
 
-func NewEventDetails(movieRepository *repository.Movie, httpClient *http.Client) *EventDetails {
+func NewEventDetails(movieRepository *repository.Movie, movieService *service.Movie) *EventDetails {
 	return &EventDetails{
 		MovieRepository: movieRepository,
-		HttpClient:      httpClient,
+		MovieService:    movieService,
 	}
 }
 
@@ -107,7 +107,7 @@ func (c *EventDetails) Handler(s *discordgo.Session, i *discordgo.InteractionCre
 
 	endTime := startTime.Add(EventDuration)
 
-	imageData, err := util.FetchAndEncodeImage(selectedMovie.ImageURL, *c.HttpClient)
+	imageData, err := c.MovieService.FetchImageAndEncode(selectedMovie.ImageURL)
 	if err != nil {
 		slog.Error("Failed to fetch and encode image", "error", err)
 	}

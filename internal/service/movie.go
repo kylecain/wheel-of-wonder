@@ -1,6 +1,7 @@
 package service
 
 import (
+	"encoding/base64"
 	"encoding/json"
 	"fmt"
 	"io"
@@ -34,16 +35,16 @@ type wikipediaSummaryResponse struct {
 	} `json:"content_urls"`
 }
 
-type MovieSearch struct {
+type Movie struct {
 	client *http.Client
 }
 
-func NewMovieSearch(client *http.Client) *MovieSearch {
-	return &MovieSearch{client: client}
+func NewMovie(client *http.Client) *Movie {
+	return &Movie{client: client}
 }
 
-func (s *MovieSearch) doGetJSON(urlStr string) ([]byte, error) {
-	req, err := http.NewRequest(http.MethodGet, urlStr, nil)
+func (s *Movie) doGetJSON(url string) ([]byte, error) {
+	req, err := http.NewRequest(http.MethodGet, url, nil)
 	if err != nil {
 		return nil, err
 	}
@@ -52,26 +53,26 @@ func (s *MovieSearch) doGetJSON(urlStr string) ([]byte, error) {
 
 	resp, err := s.client.Do(req)
 	if err != nil {
-		slog.Error("HTTP request failed", "url", urlStr, "error", err)
+		slog.Error("HTTP request failed", "url", url, "error", err)
 		return nil, err
 	}
 	defer resp.Body.Close()
 
 	body, err := io.ReadAll(resp.Body)
 	if err != nil {
-		slog.Error("Failed to read response body", "url", urlStr, "error", err)
+		slog.Error("Failed to read response body", "url", url, "error", err)
 		return nil, err
 	}
 
 	if resp.StatusCode != http.StatusOK {
-		slog.Error("Non-200 response from API", "url", urlStr, "status", resp.Status, "body", string(body))
+		slog.Error("Non-200 response from API", "url", url, "status", resp.Status, "body", string(body))
 		return nil, fmt.Errorf("non-200 response: %s", resp.Status)
 	}
 
 	return body, nil
 }
 
-func (s *MovieSearch) FetchMovie(title string) (*model.MovieInfo, error) {
+func (s *Movie) FetchMovie(title string) (*model.MovieInfo, error) {
 	query := strings.TrimSpace(title + " film")
 
 	searchURL := fmt.Sprintf(
@@ -119,4 +120,31 @@ func (s *MovieSearch) FetchMovie(title string) (*model.MovieInfo, error) {
 		ImageURL:    summaryData.Thumbnail.Source,
 		ContentURL:  summaryData.ContentUrls.Desktop.Page,
 	}, nil
+}
+
+func (s *Movie) FetchImageAndEncode(url string) (string, error) {
+	req, err := http.NewRequest(http.MethodGet, url, nil)
+	if err != nil {
+		return "", err
+	}
+
+	req.Header.Set("User-Agent", "wheel-of-wonder (+https://github.com/kylecain/wheel-of-wonder)")
+
+	resp, err := s.client.Do(req)
+	if err != nil {
+		return "", err
+	}
+	defer resp.Body.Close()
+
+	if resp.StatusCode != http.StatusOK {
+		return "", fmt.Errorf("bad status: %s", resp.Status)
+	}
+
+	imageBytes, err := io.ReadAll(resp.Body)
+	if err != nil {
+		return "", err
+	}
+
+	encoded := base64.StdEncoding.EncodeToString(imageBytes)
+	return fmt.Sprintf("data:%s;base64,%s", resp.Header.Get("Content-Type"), encoded), nil
 }

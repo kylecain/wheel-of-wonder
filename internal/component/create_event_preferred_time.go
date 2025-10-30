@@ -3,31 +3,31 @@ package component
 import (
 	"fmt"
 	"log/slog"
-	"net/http"
 	"strconv"
 	"strings"
 	"time"
 
 	"github.com/bwmarrin/discordgo"
 	"github.com/kylecain/wheel-of-wonder/internal/db/repository"
+	"github.com/kylecain/wheel-of-wonder/internal/service"
 	"github.com/kylecain/wheel-of-wonder/internal/util"
 )
 
 type CreateEventPreferredTime struct {
 	MovieRepository *repository.Movie
 	UserRepository  *repository.User
-	HttpClient      *http.Client
+	MovieService    *service.Movie
 }
 
 func NewCreateEventPreferredTime(
 	movieRepository *repository.Movie,
 	userRepository *repository.User,
-	httpClient *http.Client,
+	movieService *service.Movie,
 ) *CreateEventPreferredTime {
 	return &CreateEventPreferredTime{
 		MovieRepository: movieRepository,
 		UserRepository:  userRepository,
-		HttpClient:      httpClient,
+		MovieService:    movieService,
 	}
 }
 
@@ -61,7 +61,7 @@ func (c *CreateEventPreferredTime) Handler(s *discordgo.Session, i *discordgo.In
 		return
 	}
 
-	imageData, err := util.FetchAndEncodeImage(selectedMovie.ImageURL, *c.HttpClient)
+	imageData, err := c.MovieService.FetchImageAndEncode(selectedMovie.ImageURL)
 	if err != nil {
 		slog.Error("Failed to fetch and encode image", "error", err)
 	}

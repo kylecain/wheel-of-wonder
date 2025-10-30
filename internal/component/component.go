@@ -1,11 +1,11 @@
 package component
 
 import (
-	"net/http"
 	"strings"
 
 	"github.com/bwmarrin/discordgo"
 	"github.com/kylecain/wheel-of-wonder/internal/db/repository"
+	"github.com/kylecain/wheel-of-wonder/internal/service"
 )
 
 type Component interface {
@@ -18,12 +18,12 @@ func RegisterAll(
 	s *discordgo.Session,
 	movieRepository *repository.Movie,
 	userRepository *repository.User,
-	httpClient *http.Client,
+	movieService *service.Movie,
 ) {
 	components[CustomIDSetPreferredTimeModal] = NewSetPreferredEventTime(userRepository)
 	components[CustomIdAnnounceMovie] = NewAnnounceMovie(movieRepository)
-	components[CustomIdCreateEventModal] = NewEventDetails(movieRepository, httpClient)
-	components[CustomIdCreateEventPreferredTime] = NewCreateEventPreferredTime(movieRepository, userRepository, httpClient)
+	components[CustomIdCreateEventModal] = NewEventDetails(movieRepository, movieService)
+	components[CustomIdCreateEventPreferredTime] = NewCreateEventPreferredTime(movieRepository, userRepository, movieService)
 	components[CustomIdCreateEvent] = NewCreateEvent(movieRepository)
 	components[CustomIdDeleteMovie] = NewDeleteMovie(movieRepository)
 

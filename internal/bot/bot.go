@@ -41,10 +41,10 @@ func (b *Bot) Start() error {
 	movieRepository := repository.NewMovie(b.DB)
 	userRepository := repository.NewUser(b.DB)
 
-	searchMovieService := service.NewMovieSearch(b.HttpClient)
+	movieService := service.NewMovie(b.HttpClient)
 
-	command.RegisterAll(b.Session, b.Config, movieRepository, userRepository, searchMovieService)
-	component.RegisterAll(b.Session, movieRepository, userRepository, b.HttpClient)
+	command.RegisterAll(b.Session, b.Config, movieRepository, userRepository, movieService)
+	component.RegisterAll(b.Session, movieRepository, userRepository, movieService)
 
 	return nil
 }

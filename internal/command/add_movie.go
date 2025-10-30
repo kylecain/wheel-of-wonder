@@ -11,14 +11,14 @@ import (
 )
 
 type AddMovie struct {
-	MovieRepository    *repository.Movie
-	SearchMovieService *service.MovieSearch
+	MovieRepository *repository.Movie
+	MovieService    *service.Movie
 }
 
-func NewAddMovie(movieRepository *repository.Movie, searchMovieService *service.MovieSearch) *AddMovie {
+func NewAddMovie(movieRepository *repository.Movie, movieService *service.Movie) *AddMovie {
 	return &AddMovie{
-		MovieRepository:    movieRepository,
-		SearchMovieService: searchMovieService,
+		MovieRepository: movieRepository,
+		MovieService:    movieService,
 	}
 }
 
@@ -40,7 +40,7 @@ func (c *AddMovie) ApplicationCommand() *discordgo.ApplicationCommand {
 func (c *AddMovie) Handler(s *discordgo.Session, i *discordgo.InteractionCreate) {
 	input := i.ApplicationCommandData().Options[0].StringValue()
 
-	movieInfo, err := c.SearchMovieService.FetchMovie(input)
+	movieInfo, err := c.MovieService.FetchMovie(input)
 	if err != nil {
 		util.InteractionResponseError(s, i, err, "Failed to fetch movie info.")
 		return

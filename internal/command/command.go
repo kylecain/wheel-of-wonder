@@ -19,7 +19,7 @@ func RegisterAll(
 	config *config.Config,
 	movieRepository *repository.Movie,
 	userRepository *repository.User,
-	movieSearchService *service.MovieSearch,
+	movieSearchService *service.Movie,
 ) {
 	commands[commandNameActiveMovie] = NewActiveMovie(movieRepository)
 	commands[commandNameAddMovie] = NewAddMovie(movieRepository, movieSearchService)
