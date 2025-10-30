@@ -13,20 +13,22 @@ import (
 )
 
 type Bot struct {
-	Session *discordgo.Session
-	Config  *config.Config
-	DB      *sql.DB
+	Session    *discordgo.Session
+	Config     *config.Config
+	DB         *sql.DB
+	HttpClient *http.Client
 }
 
-func NewBot(config *config.Config, db *sql.DB) (*Bot, error) {
+func NewBot(config *config.Config, db *sql.DB, httpClient *http.Client) (*Bot, error) {
 	dg, err := discordgo.New("Bot " + config.BotToken)
 	if err != nil {
 		return nil, err
 	}
 	return &Bot{
-		Session: dg,
-		Config:  config,
-		DB:      db,
+		Session:    dg,
+		Config:     config,
+		DB:         db,
+		HttpClient: httpClient,
 	}, nil
 }
 
@@ -39,10 +41,10 @@ func (b *Bot) Start() error {
 	movieRepository := repository.NewMovie(b.DB)
 	userRepository := repository.NewUser(b.DB)
 
-	searchMovieService := service.NewMovieSearch(http.DefaultClient)
+	searchMovieService := service.NewMovieSearch(b.HttpClient)
 
 	command.RegisterAll(b.Session, b.Config, movieRepository, userRepository, searchMovieService)
-	component.RegisterAll(b.Session, movieRepository, userRepository)
+	component.RegisterAll(b.Session, movieRepository, userRepository, b.HttpClient)
 
 	return nil
 }

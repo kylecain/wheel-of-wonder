@@ -3,6 +3,7 @@ package main
 import (
 	"fmt"
 	"log/slog"
+	"net/http"
 	"os"
 	"os/signal"
 	"syscall"
@@ -15,7 +16,8 @@ import (
 func main() {
 	config := config.NewConfig()
 	db := db.NewDatabase(config)
-	bot, err := bot.NewBot(config, db)
+	httpClient := http.DefaultClient
+	bot, err := bot.NewBot(config, db, httpClient)
 	if err != nil {
 		slog.Error("error creating bot", "error", err)
 		os.Exit(1)

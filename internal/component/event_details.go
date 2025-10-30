@@ -3,17 +3,26 @@ package component
 import (
 	"fmt"
 	"log/slog"
+	"net/http"
+	"strconv"
 	"strings"
 	"time"
 
 	"github.com/bwmarrin/discordgo"
+	"github.com/kylecain/wheel-of-wonder/internal/db/repository"
 	"github.com/kylecain/wheel-of-wonder/internal/util"
 )
 
-type EventDetails struct{}
+type EventDetails struct {
+	MovieRepository *repository.Movie
+	HttpClient      *http.Client
+}
 
-func NewEventDetails() *EventDetails {
-	return &EventDetails{}
+func NewEventDetails(movieRepository *repository.Movie, httpClient *http.Client) *EventDetails {
+	return &EventDetails{
+		MovieRepository: movieRepository,
+		HttpClient:      httpClient,
+	}
 }
 
 func EventDetailsModal() []discordgo.MessageComponent {
@@ -64,7 +73,19 @@ func (c *EventDetails) Handler(s *discordgo.Session, i *discordgo.InteractionCre
 	data := i.ModalSubmitData()
 	customId := data.CustomID
 	args := strings.Split(customId, ":")
-	movieTitle := args[2]
+	movieIdStr := args[1]
+
+	movieId, err := strconv.Atoi(movieIdStr)
+	if err != nil {
+		util.InteractionResponseError(s, i, err, "Failed to convert movieID")
+		return
+	}
+
+	selectedMovie, err := c.MovieRepository.GetMovieByID(movieId)
+	if err != nil {
+		util.InteractionResponseError(s, i, err, "failed to get movie by ID")
+		return
+	}
 
 	dateInput := data.Components[0].(*discordgo.ActionsRow).Components[0].(*discordgo.TextInput).Value
 	timeInput := data.Components[1].(*discordgo.ActionsRow).Components[0].(*discordgo.TextInput).Value
@@ -85,9 +106,15 @@ func (c *EventDetails) Handler(s *discordgo.Session, i *discordgo.InteractionCre
 
 	endingTime := parsedTime.Add(2 * time.Hour)
 
+	imageData, err := util.FetchAndEncodeImage(selectedMovie.ImageURL, *c.HttpClient)
+	if err != nil {
+		slog.Error("Failed to fetch and encode image", "error", err)
+	}
+
 	scheduledEvent, err := s.GuildScheduledEventCreate(i.GuildID, &discordgo.GuildScheduledEventParams{
-		Name:               "Wheel of Wonder",
-		Description:        movieTitle,
+		Name:               selectedMovie.Title,
+		Description:        selectedMovie.Description,
+		Image:              imageData,
 		ScheduledStartTime: &parsedTime,
 		ScheduledEndTime:   &endingTime,
 		EntityType:         discordgo.GuildScheduledEventEntityTypeExternal,
@@ -107,7 +134,7 @@ func (c *EventDetails) Handler(s *discordgo.Session, i *discordgo.InteractionCre
 	err = s.InteractionRespond(i.Interaction, &discordgo.InteractionResponse{
 		Type: discordgo.InteractionResponseChannelMessageWithSource,
 		Data: &discordgo.InteractionResponseData{
-			Content: fmt.Sprintf("You created an event for %s", movieTitle),
+			Content: fmt.Sprintf("You created an event for %s", selectedMovie.Title),
 			Flags:   discordgo.MessageFlagsEphemeral,
 		},
 	})

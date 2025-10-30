@@ -3,6 +3,8 @@ package component
 import (
 	"fmt"
 	"log/slog"
+	"net/http"
+	"strconv"
 	"strings"
 	"time"
 
@@ -14,15 +16,18 @@ import (
 type CreateEventPreferredTime struct {
 	MovieRepository *repository.Movie
 	UserRepository  *repository.User
+	HttpClient      *http.Client
 }
 
 func NewCreateEventPreferredTime(
 	movieRepository *repository.Movie,
 	userRepository *repository.User,
+	httpClient *http.Client,
 ) *CreateEventPreferredTime {
 	return &CreateEventPreferredTime{
 		MovieRepository: movieRepository,
 		UserRepository:  userRepository,
+		HttpClient:      httpClient,
 	}
 }
 
@@ -57,7 +62,19 @@ func nextPreferredEventTime(now time.Time, preferredDay string, preferredTime ti
 
 func (c *CreateEventPreferredTime) Handler(s *discordgo.Session, i *discordgo.InteractionCreate) {
 	args := strings.Split(i.MessageComponentData().CustomID, ":")
-	movieTitle := args[2]
+	movieIdStr := args[1]
+
+	movieId, err := strconv.Atoi(movieIdStr)
+	if err != nil {
+		util.InteractionResponseError(s, i, err, "Failed to convert movieID")
+		return
+	}
+
+	selectedMovie, err := c.MovieRepository.GetMovieByID(movieId)
+	if err != nil {
+		util.InteractionResponseError(s, i, err, "failed to get movie by ID")
+		return
+	}
 
 	user, err := c.UserRepository.UserByUserId(i.Member.User.ID)
 	if err != nil {
@@ -81,9 +98,15 @@ func (c *CreateEventPreferredTime) Handler(s *discordgo.Session, i *discordgo.In
 	target := nextPreferredEventTime(now, user.PreferredDayOfWeek, parsedTime, loc)
 	endingTime := target.Add(eventDuration)
 
+	imageData, err := util.FetchAndEncodeImage(selectedMovie.ImageURL, *c.HttpClient)
+	if err != nil {
+		slog.Error("Failed to fetch and encode image", "error", err)
+	}
+
 	scheduledEvent, err := s.GuildScheduledEventCreate(i.GuildID, &discordgo.GuildScheduledEventParams{
-		Name:               "Wheel of Wonder",
-		Description:        movieTitle,
+		Name:               selectedMovie.Title,
+		Description:        selectedMovie.Description,
+		Image:              imageData,
 		ScheduledStartTime: &target,
 		ScheduledEndTime:   &endingTime,
 		EntityType:         discordgo.GuildScheduledEventEntityTypeExternal,
@@ -102,7 +125,7 @@ func (c *CreateEventPreferredTime) Handler(s *discordgo.Session, i *discordgo.In
 	err = s.InteractionRespond(i.Interaction, &discordgo.InteractionResponse{
 		Type: discordgo.InteractionResponseChannelMessageWithSource,
 		Data: &discordgo.InteractionResponseData{
-			Content: fmt.Sprintf("You created an event for %s at %v", movieTitle, target),
+			Content: fmt.Sprintf("You created an event for %s at %v", selectedMovie.Title, target),
 			Flags:   discordgo.MessageFlagsEphemeral,
 		},
 	})
