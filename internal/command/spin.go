@@ -1,8 +1,6 @@
 package command
 
 import (
-	"fmt"
-	"log/slog"
 	"math/rand"
 	"strconv"
 
@@ -47,37 +45,37 @@ func (c *Spin) Handler(s *discordgo.Session, i *discordgo.InteractionCreate) {
 		return
 	}
 
-	movieIDStr := fmt.Sprintf("%d", selectedMovie.ID)
+	err = s.InteractionRespond(i.Interaction, &discordgo.InteractionResponse{
+		Type: discordgo.InteractionResponseChannelMessageWithSource,
+		Data: &discordgo.InteractionResponseData{
+			Embeds:     util.MovieEmbedSlice(&selectedMovie),
+			Flags:      discordgo.MessageFlagsEphemeral,
+			Components: c.createComponents(&selectedMovie, i),
+		},
+	})
+
+	if err != nil {
+		util.InteractionResponseError(s, i, err, "failed to respond to spin command")
+	}
+}
+
+func (c *Spin) createComponents(movie *model.Movie, i *discordgo.InteractionCreate) []discordgo.MessageComponent {
+	movieIDStr := strconv.FormatInt(movie.ID, 10)
 	components := []discordgo.MessageComponent{
-		component.CreateEventButton(movieIDStr, selectedMovie.Title),
-		component.AnnounceMovieButton(movieIDStr, selectedMovie.Title),
+		component.CreateEventButton(movieIDStr, movie.Title),
+		component.AnnounceMovieButton(movieIDStr, movie.Title),
 	}
 
 	user, _ := c.UserRepository.UserByUserId(i.Member.User.ID)
 	if user != nil {
 		components = append(
 			[]discordgo.MessageComponent{
-				component.CreateEventPreferredtimeButton(movieIDStr, selectedMovie.Title),
+				component.CreateEventPreferredtimeButton(movieIDStr, movie.Title),
 			},
 			components...,
 		)
 	}
-	err = s.InteractionRespond(i.Interaction, &discordgo.InteractionResponse{
-		Type: discordgo.InteractionResponseChannelMessageWithSource,
-		Data: &discordgo.InteractionResponseData{
-			Embeds: []*discordgo.MessageEmbed{util.MovieEmbed(&selectedMovie)},
-			Flags:  discordgo.MessageFlagsEphemeral,
-			Components: []discordgo.MessageComponent{
-				discordgo.ActionsRow{
-					Components: components,
-				},
-			},
-		},
-	})
-
-	if err != nil {
-		slog.Error("failed to respond to spin command", "error", err)
-	}
+	return components
 }
 
 func (c *Spin) setActive(movie *model.Movie, i *discordgo.InteractionCreate) error {
@@ -101,22 +99,6 @@ func (c *Spin) setActive(movie *model.Movie, i *discordgo.InteractionCreate) err
 	err = c.MovieRepository.UpdateActive(movie.ID, true)
 	if err != nil {
 		return err
-	}
-
-	movieIDStr := strconv.FormatInt(movie.ID, 10)
-	components := []discordgo.MessageComponent{
-		component.CreateEventButton(movieIDStr, movie.Title),
-		component.AnnounceMovieButton(movieIDStr, movie.Title),
-	}
-
-	user, _ := c.UserRepository.UserByUserId(i.Member.User.ID)
-	if user != nil {
-		components = append(
-			[]discordgo.MessageComponent{
-				component.CreateEventPreferredtimeButton(movieIDStr, movie.Title),
-			},
-			components...,
-		)
 	}
 
 	return nil

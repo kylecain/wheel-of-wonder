@@ -24,3 +24,25 @@ func MovieEmbed(movie *model.Movie) *discordgo.MessageEmbed {
 		},
 	}
 }
+
+func MovieEmbedSlice(movie *model.Movie) []*discordgo.MessageEmbed {
+	embed := &discordgo.MessageEmbed{
+		Title:       movie.Title,
+		Description: movie.Description,
+		Image:       &discordgo.MessageEmbedImage{URL: movie.ImageURL},
+		Fields: []*discordgo.MessageEmbedField{
+			{
+				Name:   "Added by",
+				Value:  movie.Username,
+				Inline: true,
+			},
+			{
+				Name:   "Source",
+				Value:  movie.ContentURL,
+				Inline: true,
+			},
+		},
+	}
+
+	return []*discordgo.MessageEmbed{embed}
+}
