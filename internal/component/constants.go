@@ -7,5 +7,4 @@ const (
 	CustomIdCreateEventModal         = "crate_event_modal"
 	CustomIdCreateEventPreferredTime = "create_event_preferred_time"
 	CustomIdDeleteMovie              = "delete_movie"
-	CustomIdSetActiveMovie           = "set_active_movie"
 )

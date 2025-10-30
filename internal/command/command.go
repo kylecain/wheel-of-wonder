@@ -26,7 +26,7 @@ func RegisterAll(
 	commands[commandNameAllMovies] = NewAllMovies(movieRepository)
 	commands[commandNameDeleteMovie] = NewDeleteMovie(movieRepository)
 	commands[commandNameSetPreferredEventTime] = NewSetPreferredEventTime(userRepository)
-	commands[commandNameSpin] = NewSpin(movieRepository)
+	commands[commandNameSpin] = NewSpin(movieRepository, userRepository)
 	commands[commandNameWatchedMovies] = NewWatchedMovies(movieRepository)
 
 	for _, cmd := range commands {
