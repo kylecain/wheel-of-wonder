@@ -13,6 +13,8 @@ import (
 	"github.com/kylecain/wheel-of-wonder/internal/util"
 )
 
+const eventDuration = 2 * time.Hour
+
 type CreateEventPreferredTime struct {
 	MovieRepository *repository.Movie
 	UserRepository  *repository.User
@@ -39,7 +41,70 @@ func CreateEventPreferredtimeButton(movieID, movieTitle string) discordgo.Button
 	}
 }
 
-const eventDuration = 2 * time.Hour
+func (c *CreateEventPreferredTime) Handler(s *discordgo.Session, i *discordgo.InteractionCreate) {
+	args := strings.Split(i.MessageComponentData().CustomID, ":")
+	movieIdStr := args[1]
+
+	movieId, err := strconv.Atoi(movieIdStr)
+	if err != nil {
+		util.InteractionResponseError(s, i, err, "Failed to convert movieID")
+		return
+	}
+
+	selectedMovie, err := c.MovieRepository.GetMovieByID(movieId)
+	if err != nil {
+		util.InteractionResponseError(s, i, err, "failed to get movie by ID")
+		return
+	}
+
+	startTime, endTime, err := c.getEventStartAndEndTime(i)
+	if err != nil {
+		util.InteractionResponseError(s, i, err, "Failed to get event start and end time")
+		return
+	}
+
+	imageData, err := util.FetchAndEncodeImage(selectedMovie.ImageURL, *c.HttpClient)
+	if err != nil {
+		slog.Error("Failed to fetch and encode image", "error", err)
+	}
+
+	scheduledEvent, err := s.GuildScheduledEventCreate(i.GuildID, &discordgo.GuildScheduledEventParams{
+		Name:               selectedMovie.Title,
+		Description:        selectedMovie.Description,
+		Image:              imageData,
+		ScheduledStartTime: startTime,
+		ScheduledEndTime:   endTime,
+		EntityType:         discordgo.GuildScheduledEventEntityTypeExternal,
+		EntityMetadata: &discordgo.GuildScheduledEventEntityMetadata{
+			Location: "Online",
+		},
+		PrivacyLevel: discordgo.GuildScheduledEventPrivacyLevelGuildOnly,
+	})
+	if err != nil {
+		slog.Error("Failed to create schedule event", "error", err)
+		return
+	}
+
+	slog.Info("Scheduled event created", "event", scheduledEvent)
+
+	err = s.InteractionRespond(i.Interaction, &discordgo.InteractionResponse{
+		Type: discordgo.InteractionResponseChannelMessageWithSource,
+		Data: &discordgo.InteractionResponseData{
+			Content: fmt.Sprintf("You created an event for %s at %v", selectedMovie.Title, startTime),
+			Flags:   discordgo.MessageFlagsEphemeral,
+		},
+	})
+	if err != nil {
+		slog.Error("Failed to update user on scheduled event", "error", err)
+		return
+	}
+
+	eventURL := fmt.Sprintf("https://discord.com/events/%s/%s", i.GuildID, scheduledEvent.ID)
+	_, err = s.ChannelMessageSend(i.ChannelID, eventURL)
+	if err != nil {
+		slog.Error("Failed to send event link to general chat", "error", err)
+	}
+}
 
 func nextPreferredEventTime(now time.Time, preferredDay string, preferredTime time.Time, loc *time.Location) time.Time {
 	dayOfWeekLower := strings.ToLower(preferredDay)
@@ -60,83 +125,26 @@ func nextPreferredEventTime(now time.Time, preferredDay string, preferredTime ti
 	return target
 }
 
-func (c *CreateEventPreferredTime) Handler(s *discordgo.Session, i *discordgo.InteractionCreate) {
-	args := strings.Split(i.MessageComponentData().CustomID, ":")
-	movieIdStr := args[1]
-
-	movieId, err := strconv.Atoi(movieIdStr)
-	if err != nil {
-		util.InteractionResponseError(s, i, err, "Failed to convert movieID")
-		return
-	}
-
-	selectedMovie, err := c.MovieRepository.GetMovieByID(movieId)
-	if err != nil {
-		util.InteractionResponseError(s, i, err, "failed to get movie by ID")
-		return
-	}
+func (c *CreateEventPreferredTime) getEventStartAndEndTime(i *discordgo.InteractionCreate) (*time.Time, *time.Time, error) {
 
 	user, err := c.UserRepository.UserByUserId(i.Member.User.ID)
 	if err != nil {
-		util.InteractionResponseError(s, i, err, "failed to get user settings")
-		return
+		return nil, nil, err
 	}
 
 	parsedTime, err := time.Parse("15:04", user.PreferredTimeOfDay)
 	if err != nil {
-		util.InteractionResponseError(s, i, err, "failed to parse preferred time")
-		return
+		return nil, nil, err
 	}
 
 	loc, err := time.LoadLocation(user.PreferredTimezone)
 	if err != nil {
-		util.InteractionResponseError(s, i, err, "failed to load timezone")
-		return
+		return nil, nil, err
 	}
 
 	now := time.Now().In(loc)
-	target := nextPreferredEventTime(now, user.PreferredDayOfWeek, parsedTime, loc)
-	endingTime := target.Add(eventDuration)
+	startTime := nextPreferredEventTime(now, user.PreferredDayOfWeek, parsedTime, loc)
+	endTime := startTime.Add(eventDuration)
 
-	imageData, err := util.FetchAndEncodeImage(selectedMovie.ImageURL, *c.HttpClient)
-	if err != nil {
-		slog.Error("Failed to fetch and encode image", "error", err)
-	}
-
-	scheduledEvent, err := s.GuildScheduledEventCreate(i.GuildID, &discordgo.GuildScheduledEventParams{
-		Name:               selectedMovie.Title,
-		Description:        selectedMovie.Description,
-		Image:              imageData,
-		ScheduledStartTime: &target,
-		ScheduledEndTime:   &endingTime,
-		EntityType:         discordgo.GuildScheduledEventEntityTypeExternal,
-		EntityMetadata: &discordgo.GuildScheduledEventEntityMetadata{
-			Location: "Online",
-		},
-		PrivacyLevel: discordgo.GuildScheduledEventPrivacyLevelGuildOnly,
-	})
-	if err != nil {
-		slog.Error("Failed to create schedule event", "error", err)
-		return
-	}
-
-	slog.Info("Scheduled event created", "event", scheduledEvent)
-
-	err = s.InteractionRespond(i.Interaction, &discordgo.InteractionResponse{
-		Type: discordgo.InteractionResponseChannelMessageWithSource,
-		Data: &discordgo.InteractionResponseData{
-			Content: fmt.Sprintf("You created an event for %s at %v", selectedMovie.Title, target),
-			Flags:   discordgo.MessageFlagsEphemeral,
-		},
-	})
-	if err != nil {
-		slog.Error("Failed to update user on scheduled event", "error", err)
-		return
-	}
-
-	eventURL := fmt.Sprintf("https://discord.com/events/%s/%s", i.GuildID, scheduledEvent.ID)
-	_, err = s.ChannelMessageSend(i.ChannelID, eventURL)
-	if err != nil {
-		slog.Error("Failed to send event link to general chat", "error", err)
-	}
+	return &startTime, &endTime, nil
 }
