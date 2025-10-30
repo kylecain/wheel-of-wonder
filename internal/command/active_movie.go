@@ -1,7 +1,6 @@
 package command
 
 import (
-	"fmt"
 	"log/slog"
 
 	"github.com/bwmarrin/discordgo"
@@ -36,8 +35,8 @@ func (c *ActiveMovie) Handler(s *discordgo.Session, i *discordgo.InteractionCrea
 	err = s.InteractionRespond(i.Interaction, &discordgo.InteractionResponse{
 		Type: discordgo.InteractionResponseChannelMessageWithSource,
 		Data: &discordgo.InteractionResponseData{
-			Content: fmt.Sprintf("The active movie is: %s", activeMovie.Title),
-			Flags:   discordgo.MessageFlagsEphemeral,
+			Embeds: []*discordgo.MessageEmbed{util.MovieEmbed(activeMovie)},
+			Flags:  discordgo.MessageFlagsEphemeral,
 		},
 	})
 	if err != nil {
