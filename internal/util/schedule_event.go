@@ -9,10 +9,25 @@ import (
 	"github.com/kylecain/wheel-of-wonder/internal/model"
 )
 
+const (
+	maxNameLength        = 100
+	maxDescriptionLength = 1000
+)
+
 func ScheduleEvent(movie *model.Movie, imageData string, startTime time.Time, endTime time.Time, s *discordgo.Session, i *discordgo.InteractionCreate) error {
+	name, description := movie.Title, movie.Description
+
+	if len(movie.Title) > maxNameLength {
+		name = movie.Title[:maxNameLength]
+	}
+
+	if len(movie.Description) > maxDescriptionLength {
+		description = movie.Description[:maxDescriptionLength]
+	}
+
 	scheduledEvent, err := s.GuildScheduledEventCreate(i.GuildID, &discordgo.GuildScheduledEventParams{
-		Name:               movie.Title,
-		Description:        movie.Description,
+		Name:               name,
+		Description:        description,
 		Image:              imageData,
 		ScheduledStartTime: &startTime,
 		ScheduledEndTime:   &endTime,
