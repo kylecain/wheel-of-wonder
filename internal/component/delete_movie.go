@@ -30,6 +30,7 @@ func (c *DeleteMovie) Handler(s *discordgo.Session, i *discordgo.InteractionCrea
 	err = c.MovieRepository.DeleteMovie(int64(movieId))
 	if err != nil {
 		util.InteractionResponseError(s, i, err, "Failed to delete movie")
+		return
 	}
 
 	err = s.InteractionRespond(i.Interaction, &discordgo.InteractionResponse{
