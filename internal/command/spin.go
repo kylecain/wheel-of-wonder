@@ -1,7 +1,6 @@
 package command
 
 import (
-	"fmt"
 	"log/slog"
 	"math/rand"
 
@@ -39,8 +38,8 @@ func (c *Spin) Handler(s *discordgo.Session, i *discordgo.InteractionCreate) {
 	err = s.InteractionRespond(i.Interaction, &discordgo.InteractionResponse{
 		Type: discordgo.InteractionResponseChannelMessageWithSource,
 		Data: &discordgo.InteractionResponseData{
-			Content: fmt.Sprintf("You spun the wheel and got: %s", selectedMovie.Title),
-			Flags:   discordgo.MessageFlagsEphemeral,
+			Embeds: []*discordgo.MessageEmbed{util.MovieEmbed(&selectedMovie)},
+			Flags:  discordgo.MessageFlagsEphemeral,
 			Components: []discordgo.MessageComponent{
 				discordgo.ActionsRow{
 					Components: []discordgo.MessageComponent{

@@ -3,10 +3,12 @@ package component
 import (
 	"fmt"
 	"log/slog"
+	"strconv"
 	"strings"
 
 	"github.com/bwmarrin/discordgo"
 	"github.com/kylecain/wheel-of-wonder/internal/db/repository"
+	"github.com/kylecain/wheel-of-wonder/internal/util"
 )
 
 type AnnounceMovie struct {
@@ -29,22 +31,27 @@ func AnnounceMovieButton(movieID, movieTitle string) discordgo.Button {
 
 func (c *AnnounceMovie) Handler(s *discordgo.Session, i *discordgo.InteractionCreate) {
 	args := strings.Split(i.MessageComponentData().CustomID, ":")
-	_, movieTitle := args[1], args[2]
+	movieIdStr := args[1]
+	movieId, err := strconv.Atoi(movieIdStr)
+	if err != nil {
+		util.InteractionResponseError(s, i, err, "Failed to convert movieID")
+		return
+	}
 
-	err := s.InteractionRespond(i.Interaction, &discordgo.InteractionResponse{
+	selectedMovie, err := c.MovieRepository.GetMovieByID(movieId)
+	if err != nil {
+		util.InteractionResponseError(s, i, err, "failed to get movie by ID")
+		return
+	}
+
+	err = s.InteractionRespond(i.Interaction, &discordgo.InteractionResponse{
 		Type: discordgo.InteractionResponseChannelMessageWithSource,
 		Data: &discordgo.InteractionResponseData{
-			Content: fmt.Sprintf("Announced: %s", movieTitle),
-			Flags:   discordgo.MessageFlagsEphemeral,
+			Embeds:  []*discordgo.MessageEmbed{util.MovieEmbed(selectedMovie)},
+			Content: "Now Showing:",
 		},
 	})
 	if err != nil {
 		slog.Error("Failed to respond to interaction", "error", err)
-	}
-
-	message := fmt.Sprintf("Now Playing: %s", movieTitle)
-	_, err = s.ChannelMessageSend(i.ChannelID, message)
-	if err != nil {
-		slog.Error("Failed to send message", "error", err)
 	}
 }

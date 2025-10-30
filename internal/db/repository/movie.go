@@ -18,7 +18,7 @@ func NewMovie(db *sql.DB) *Movie {
 	}
 }
 
-const movieSelectCols = "id, guild_id, user_id, username, title, created_at, updated_at"
+const movieSelectCols = "id, guild_id, user_id, username, title, description, image_url, content_url, created_at, updated_at"
 
 type scanner interface {
 	Scan(dest ...any) error
@@ -32,6 +32,9 @@ func scanMovie(s scanner) (*model.Movie, error) {
 		&m.UserID,
 		&m.Username,
 		&m.Title,
+		&m.Description,
+		&m.ImageURL,
+		&m.ContentURL,
 		&m.CreatedAt,
 		&m.UpdatedAt,
 	); err != nil {
@@ -63,8 +66,8 @@ func (r *Movie) getMovies(query string, args ...any) ([]model.Movie, error) {
 }
 
 func (r *Movie) AddMovie(movie *model.Movie) (int64, error) {
-	query := " INSERT INTO movies (guild_id, user_id, username, title) VALUES (?, ?, ?, ?)"
-	result, err := r.db.Exec(query, movie.GuildID, movie.UserID, movie.Username, movie.Title)
+	query := " INSERT INTO movies (guild_id, user_id, username, title, description, image_url, content_url) VALUES (?, ?, ?, ?, ?, ?, ?)"
+	result, err := r.db.Exec(query, movie.GuildID, movie.UserID, movie.Username, movie.Title, movie.Description, movie.ImageURL, movie.ContentURL)
 
 	if err != nil {
 		return 0, fmt.Errorf("AddMovie Error: %v", err)
