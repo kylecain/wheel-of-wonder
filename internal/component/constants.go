@@ -1,5 +1,7 @@
 package component
 
+import "time"
+
 const (
 	CustomIDSetPreferredTimeModal    = "set_preferred_time_modal"
 	CustomIdAnnounceMovie            = "announce_movie"
@@ -7,4 +9,5 @@ const (
 	CustomIdCreateEventModal         = "crate_event_modal"
 	CustomIdCreateEventPreferredTime = "create_event_preferred_time"
 	CustomIdDeleteMovie              = "delete_movie"
+	EventDuration                    = 2 * time.Hour
 )

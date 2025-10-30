@@ -98,54 +98,22 @@ func (c *EventDetails) Handler(s *discordgo.Session, i *discordgo.InteractionCre
 		util.InteractionResponseError(s, i, err, "Invalid timezone provided.")
 		return
 	}
-	parsedTime, err := time.ParseInLocation("2006-01-02T15:04", fmt.Sprintf("%sT%s", dateInput, timeInput), loc)
+
+	startTime, err := time.ParseInLocation("2006-01-02T15:04", fmt.Sprintf("%sT%s", dateInput, timeInput), loc)
 	if err != nil {
 		util.InteractionResponseError(s, i, err, "Invalid date or time format.")
 		return
 	}
 
-	endingTime := parsedTime.Add(2 * time.Hour)
+	endTime := startTime.Add(EventDuration)
 
 	imageData, err := util.FetchAndEncodeImage(selectedMovie.ImageURL, *c.HttpClient)
 	if err != nil {
 		slog.Error("Failed to fetch and encode image", "error", err)
 	}
 
-	scheduledEvent, err := s.GuildScheduledEventCreate(i.GuildID, &discordgo.GuildScheduledEventParams{
-		Name:               selectedMovie.Title,
-		Description:        selectedMovie.Description,
-		Image:              imageData,
-		ScheduledStartTime: &parsedTime,
-		ScheduledEndTime:   &endingTime,
-		EntityType:         discordgo.GuildScheduledEventEntityTypeExternal,
-		EntityMetadata: &discordgo.GuildScheduledEventEntityMetadata{
-			Location: "Online",
-		},
-		PrivacyLevel: discordgo.GuildScheduledEventPrivacyLevelGuildOnly,
-	})
-
+	err = util.ScheduleEvent(selectedMovie, imageData, startTime, endTime, s, i)
 	if err != nil {
-		util.InteractionResponseError(s, i, err, "Failed to create scheduled event.")
-		return
-	}
-
-	slog.Info("Scheduled event created", "event", scheduledEvent)
-
-	err = s.InteractionRespond(i.Interaction, &discordgo.InteractionResponse{
-		Type: discordgo.InteractionResponseChannelMessageWithSource,
-		Data: &discordgo.InteractionResponseData{
-			Content: fmt.Sprintf("You created an event for %s", selectedMovie.Title),
-			Flags:   discordgo.MessageFlagsEphemeral,
-		},
-	})
-	if err != nil {
-		slog.Error("Failed to respond to create event modal", "error", err)
-		return
-	}
-
-	eventURL := fmt.Sprintf("https://discord.com/events/%s/%s", i.GuildID, scheduledEvent.ID)
-	_, err = s.ChannelMessageSend(i.ChannelID, eventURL)
-	if err != nil {
-		slog.Error("Failed to send event link to general chat", "error", err)
+		slog.Error("Failed to schedule and notify for event", "error", err)
 	}
 }

@@ -13,8 +13,6 @@ import (
 	"github.com/kylecain/wheel-of-wonder/internal/util"
 )
 
-const eventDuration = 2 * time.Hour
-
 type CreateEventPreferredTime struct {
 	MovieRepository *repository.Movie
 	UserRepository  *repository.User
@@ -68,41 +66,9 @@ func (c *CreateEventPreferredTime) Handler(s *discordgo.Session, i *discordgo.In
 		slog.Error("Failed to fetch and encode image", "error", err)
 	}
 
-	scheduledEvent, err := s.GuildScheduledEventCreate(i.GuildID, &discordgo.GuildScheduledEventParams{
-		Name:               selectedMovie.Title,
-		Description:        selectedMovie.Description,
-		Image:              imageData,
-		ScheduledStartTime: startTime,
-		ScheduledEndTime:   endTime,
-		EntityType:         discordgo.GuildScheduledEventEntityTypeExternal,
-		EntityMetadata: &discordgo.GuildScheduledEventEntityMetadata{
-			Location: "Online",
-		},
-		PrivacyLevel: discordgo.GuildScheduledEventPrivacyLevelGuildOnly,
-	})
+	err = util.ScheduleEvent(selectedMovie, imageData, *startTime, *endTime, s, i)
 	if err != nil {
-		slog.Error("Failed to create schedule event", "error", err)
-		return
-	}
-
-	slog.Info("Scheduled event created", "event", scheduledEvent)
-
-	err = s.InteractionRespond(i.Interaction, &discordgo.InteractionResponse{
-		Type: discordgo.InteractionResponseChannelMessageWithSource,
-		Data: &discordgo.InteractionResponseData{
-			Content: fmt.Sprintf("You created an event for %s at %v", selectedMovie.Title, startTime),
-			Flags:   discordgo.MessageFlagsEphemeral,
-		},
-	})
-	if err != nil {
-		slog.Error("Failed to update user on scheduled event", "error", err)
-		return
-	}
-
-	eventURL := fmt.Sprintf("https://discord.com/events/%s/%s", i.GuildID, scheduledEvent.ID)
-	_, err = s.ChannelMessageSend(i.ChannelID, eventURL)
-	if err != nil {
-		slog.Error("Failed to send event link to general chat", "error", err)
+		slog.Error("Failed to schedule and notify for event", "error", err)
 	}
 }
 
@@ -144,7 +110,7 @@ func (c *CreateEventPreferredTime) getEventStartAndEndTime(i *discordgo.Interact
 
 	now := time.Now().In(loc)
 	startTime := nextPreferredEventTime(now, user.PreferredDayOfWeek, parsedTime, loc)
-	endTime := startTime.Add(eventDuration)
+	endTime := startTime.Add(EventDuration)
 
 	return &startTime, &endTime, nil
 }
