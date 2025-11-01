@@ -2,6 +2,8 @@ package bot
 
 import (
 	"database/sql"
+	"fmt"
+	"log/slog"
 	"net/http"
 
 	"github.com/bwmarrin/discordgo"
@@ -13,42 +15,47 @@ import (
 )
 
 type Bot struct {
-	Session    *discordgo.Session
-	Config     *config.Config
-	DB         *sql.DB
-	HttpClient *http.Client
+	session    *discordgo.Session
+	config     *config.Config
+	db         *sql.DB
+	httpClient *http.Client
+	logger     *slog.Logger
 }
 
-func NewBot(config *config.Config, db *sql.DB, httpClient *http.Client) (*Bot, error) {
+func NewBot(config *config.Config, db *sql.DB, httpClient *http.Client, logger *slog.Logger) (*Bot, error) {
 	dg, err := discordgo.New("Bot " + config.BotToken)
 	if err != nil {
-		return nil, err
+		return nil, fmt.Errorf("creating bot: %w", err)
 	}
+
 	return &Bot{
-		Session:    dg,
-		Config:     config,
-		DB:         db,
-		HttpClient: httpClient,
+		session:    dg,
+		config:     config,
+		db:         db,
+		httpClient: httpClient,
+		logger:     logger.With(slog.String("component", "bot")),
 	}, nil
 }
 
 func (b *Bot) Start() error {
-	err := b.Session.Open()
+	err := b.session.Open()
 	if err != nil {
 		return err
 	}
 
-	movieRepository := repository.NewMovie(b.DB)
-	userRepository := repository.NewUser(b.DB)
+	movieRepository := repository.NewMovie(b.db, b.logger)
+	userRepository := repository.NewUser(b.db, b.logger)
 
-	movieService := service.NewMovie(b.HttpClient)
+	movieService := service.NewMovie(b.httpClient, b.logger)
 
-	command.RegisterAll(b.Session, b.Config, movieRepository, userRepository, movieService)
-	component.RegisterAll(b.Session, movieRepository, userRepository, movieService)
+	// commandLogger := b.logger.With(slog.String("component", "command"))
+	command.RegisterAll(b.session, b.config, movieRepository, userRepository, movieService)
+	// componentLogger := b.logger.With(slog.String("component", "component"))
+	component.RegisterAll(b.session, movieRepository, userRepository, movieService)
 
 	return nil
 }
 
 func (b *Bot) Stop() error {
-	return b.Session.Close()
+	return b.session.Close()
 }

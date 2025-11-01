@@ -2,8 +2,7 @@ package db
 
 import (
 	"database/sql"
-	"log/slog"
-	"os"
+	"fmt"
 	"strings"
 
 	"github.com/golang-migrate/migrate/v4"
@@ -19,27 +18,22 @@ var (
 	databaseUrl  = "sqlite3://data/db.sqlite3"
 )
 
-func NewDatabase(config *config.Config) *sql.DB {
+func NewDatabase(coneefig *config.Config) (*sql.DB, error) {
 	m, err := migrate.New(migrationUrl, databaseUrl)
 	if err != nil {
-		slog.Error("migration setup failed", "error", err)
-		os.Exit(1)
+		return nil, fmt.Errorf("migration setup: %w", err)
 	}
 	defer m.Close()
 
 	if err := m.Up(); err != nil && err != migrate.ErrNoChange {
-		slog.Error("migration failed", "error", err)
-		os.Exit(1)
+		return nil, fmt.Errorf("applying migrations: %w", err)
 	}
-
-	slog.Info("migrations applied successfully")
 
 	dbPath := strings.TrimPrefix(databaseUrl, "sqlite3://")
 	db, err := sql.Open("sqlite3", dbPath)
 	if err != nil {
-		slog.Error("error creating database", "error", err)
-		os.Exit(1)
+		return nil, fmt.Errorf("open sqlite db %s: %w", dbPath, err)
 	}
 
-	return db
+	return db, nil
 }

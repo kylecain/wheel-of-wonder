@@ -9,12 +9,14 @@ import (
 )
 
 type User struct {
-	db *sql.DB
+	db     *sql.DB
+	logger *slog.Logger
 }
 
-func NewUser(db *sql.DB) *User {
+func NewUser(db *sql.DB, logger *slog.Logger) *User {
 	return &User{
-		db: db,
+		db:     db,
+		logger: logger.With(slog.String("component", "repository.user")),
 	}
 }
 
@@ -38,15 +40,15 @@ func (r *User) AddUser(user *model.User) (int64, error) {
 	)
 
 	if err != nil {
-		return 0, fmt.Errorf("AddUser Error: %v", err)
+		return 0, fmt.Errorf("failed to exec: %w", err)
 	}
 
 	id, err := result.LastInsertId()
 	if err != nil {
-		return 0, fmt.Errorf("AddUser Error: %v", err)
+		return 0, fmt.Errorf("failed to get last id: %w", err)
 	}
 
-	slog.Info("created user", "id", id, "user_id", user.UserID, "username", user.Username)
+	r.logger.Info("created user", slog.Int64("id", id), slog.String("user_id", user.UserID), slog.String("username", user.Username))
 	return id, nil
 }
 
@@ -72,11 +74,11 @@ func (r *User) UserByUserId(userID string) (*model.User, error) {
 		&user.UpdatedAt,
 	); err != nil {
 		if err == sql.ErrNoRows {
-			slog.Info("no user found", "user_id", userID)
+			slog.Debug("user not found", slog.String("user_id", userID))
 			return nil, nil
 		}
-		return nil, fmt.Errorf("UserByUserId Error: %v", err)
+		return nil, fmt.Errorf("failed to scan: %w", err)
 	}
-	slog.Info("retrieved user", "id", user.ID, "user_id", user.UserID)
+	r.logger.Debug("retrieved user", slog.Int64("id", user.ID), slog.String("user_id", user.UserID))
 	return &user, nil
 }

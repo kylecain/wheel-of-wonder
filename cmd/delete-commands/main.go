@@ -9,7 +9,15 @@ import (
 )
 
 func main() {
-	config := config.NewConfig()
+	handlerOptions := slog.HandlerOptions{Level: slog.LevelInfo}
+	logger := slog.New(slog.NewJSONHandler(os.Stdout, &handlerOptions))
+
+	configLogger := logger.With(slog.String("component", "config"))
+	config, err := config.NewConfig(configLogger)
+	if err != nil {
+		configLogger.Error("failed to load config", slog.Any("err", err))
+		os.Exit(1)
+	}
 
 	s, err := discordgo.New("Bot " + config.BotToken)
 	if err != nil {

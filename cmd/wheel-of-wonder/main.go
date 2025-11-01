@@ -1,7 +1,6 @@
 package main
 
 import (
-	"fmt"
 	"log/slog"
 	"net/http"
 	"os"
@@ -14,18 +13,31 @@ import (
 )
 
 func main() {
-	config := config.NewConfig()
-	db := db.NewDatabase(config)
+	handlerOptions := slog.HandlerOptions{Level: slog.LevelInfo}
+	logger := slog.New(slog.NewJSONHandler(os.Stdout, &handlerOptions))
 	httpClient := http.DefaultClient
-	bot, err := bot.NewBot(config, db, httpClient)
+
+	config, err := config.NewConfig(logger)
 	if err != nil {
-		slog.Error("error creating bot", "error", err)
+		logger.Error("failed to load config", slog.Any("err", err))
+		os.Exit(1)
+	}
+
+	db, err := db.NewDatabase(config)
+	if err != nil {
+		logger.Error("failed to initalize database", slog.Any("err", err))
+		os.Exit(1)
+	}
+
+	bot, err := bot.NewBot(config, db, httpClient, logger)
+	if err != nil {
+		logger.Error("failed to create bot", slog.Any("err", err))
 		os.Exit(1)
 	}
 	bot.Start()
 	defer bot.Stop()
 
-	fmt.Println("Bot is now running.  Press CTRL-C to exit.")
+	logger.Info("bot is now running")
 	sc := make(chan os.Signal, 1)
 	signal.Notify(sc, syscall.SIGINT, syscall.SIGTERM, os.Interrupt)
 	<-sc
