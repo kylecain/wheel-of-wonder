@@ -41,3 +41,16 @@ func MovieInfoGroup(m *model.MovieInfo) slog.Attr {
 		slog.String("content_url", m.ContentURL),
 	)
 }
+
+func UserGroup(u *model.User) slog.Attr {
+	return slog.Group("user",
+		slog.Int64("id", u.ID),
+		slog.String("user_id", u.UserID),
+		slog.String("username", u.Username),
+		slog.String("preferred_day_of_week", u.PreferredDayOfWeek),
+		slog.String("preferredTimeOfDay", u.PreferredTimeOfDay),
+		slog.String("preferred_timezone", u.PreferredTimezone),
+		slog.Time("created_at", u.CreatedAt),
+		slog.Time("updated_at", u.UpdatedAt),
+	)
+}
