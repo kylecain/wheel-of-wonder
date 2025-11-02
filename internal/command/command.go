@@ -26,8 +26,8 @@ func RegisterAll(
 ) {
 	commands[commandNameActiveMovie] = NewActiveMovie(movieRepository, logger)
 	commands[commandNameAddMovie] = NewAddMovie(movieRepository, movieSearchService, logger)
-	commands[commandNameAllMovies] = NewAllMovies(movieRepository)
-	commands[commandNameDeleteMovie] = NewDeleteMovie(movieRepository)
+	commands[commandNameAllMovies] = NewAllMovies(movieRepository, logger)
+	commands[commandNameDeleteMovie] = NewDeleteMovie(movieRepository, logger)
 	commands[commandNameSetPreferredEventTime] = NewSetPreferredEventTime(userRepository)
 	commands[commandNameSpin] = NewSpin(movieRepository, userRepository)
 	commands[commandNameWatchedMovies] = NewWatchedMovies(movieRepository)

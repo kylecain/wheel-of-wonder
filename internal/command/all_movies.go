@@ -11,12 +11,14 @@ import (
 )
 
 type AllMovies struct {
-	MovieRepository *repository.Movie
+	movieRepository *repository.Movie
+	logger          *slog.Logger
 }
 
-func NewAllMovies(movieRepository *repository.Movie) *AllMovies {
+func NewAllMovies(movieRepository *repository.Movie, logger *slog.Logger) *AllMovies {
 	return &AllMovies{
-		MovieRepository: movieRepository,
+		movieRepository: movieRepository,
+		logger:          logger,
 	}
 }
 
@@ -28,11 +30,19 @@ func (c *AllMovies) ApplicationCommand() *discordgo.ApplicationCommand {
 }
 
 func (c *AllMovies) Handler(s *discordgo.Session, i *discordgo.InteractionCreate) {
-	movies, err := c.MovieRepository.GetAll(i.GuildID)
+	l := c.logger.
+		With(slog.String("command_name", i.ApplicationCommandData().Name)).
+		With(util.InteractionGroup(i))
+	l.Info("received command interaction")
+
+	movies, err := c.movieRepository.GetAll(i.GuildID)
 	if err != nil {
-		util.InteractionResponseError(s, i, err, "Failed to get all movies.")
+		l.Error("failed to get all movies", slog.Any("err", err))
+		util.RespondError(s, i, "Something went wrong getting movie data.")
 		return
 	}
+
+	l.Info("got all movies for guild from database", slog.Int("movie_count", len(movies)))
 
 	var b strings.Builder
 	for _, movie := range movies {
@@ -55,6 +65,8 @@ func (c *AllMovies) Handler(s *discordgo.Session, i *discordgo.InteractionCreate
 		},
 	})
 	if err != nil {
-		slog.Error("Failed to respond to all-movies command", "error", err)
+		l.Error("failed to respond to interaction", slog.Any("err", err))
+	} else {
+		l.Info("successfully responded to command", slog.Int("movie_count", len(movies)))
 	}
 }

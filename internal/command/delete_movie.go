@@ -10,12 +10,14 @@ import (
 )
 
 type DeleteMovie struct {
-	MovieRepository *repository.Movie
+	movieRepository *repository.Movie
+	logger          *slog.Logger
 }
 
-func NewDeleteMovie(movieRepository *repository.Movie) *DeleteMovie {
+func NewDeleteMovie(movieRepository *repository.Movie, logger *slog.Logger) *DeleteMovie {
 	return &DeleteMovie{
-		MovieRepository: movieRepository,
+		movieRepository: movieRepository,
+		logger:          logger,
 	}
 }
 
@@ -27,9 +29,19 @@ func (c *DeleteMovie) ApplicationCommand() *discordgo.ApplicationCommand {
 }
 
 func (c *DeleteMovie) Handler(s *discordgo.Session, i *discordgo.InteractionCreate) {
-	movies, err := c.MovieRepository.GetAllUnwatched(i.GuildID)
-	if err != nil || len(movies) == 0 {
-		util.InteractionResponseError(s, i, err, "No unwatched movies available to delete")
+	l := c.logger.
+		With(slog.String("command_name", i.ApplicationCommandData().Name)).
+		With(util.InteractionGroup(i))
+
+	l.Info("recieved command interaction")
+	movies, err := c.movieRepository.GetAllUnwatched(i.GuildID)
+	if err != nil {
+		l.Error("failed to get unwatched movies", slog.Any("err", err))
+		util.RespondError(s, i, "Something went wrong fetching unwatched movies for guild.")
+		return
+	} else if len(movies) == 0 {
+		l.Warn("no unwatched movies found")
+		util.RespondError(s, i, "No unwatched movies were found for guild.")
 		return
 	}
 
@@ -42,6 +54,8 @@ func (c *DeleteMovie) Handler(s *discordgo.Session, i *discordgo.InteractionCrea
 		},
 	})
 	if err != nil {
-		slog.Error("Failed to respond to delete-movie command", "error", err)
+		l.Error("failed to respond to interaction", slog.Any("err", err))
+	} else {
+		l.Info("successfully responded to command")
 	}
 }

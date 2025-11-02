@@ -42,6 +42,7 @@ func (c *AddMovie) ApplicationCommand() *discordgo.ApplicationCommand {
 func (c *AddMovie) Handler(s *discordgo.Session, i *discordgo.InteractionCreate) {
 	input := i.ApplicationCommandData().Options[0].StringValue()
 	l := c.logger.
+		With(slog.String("command_name", i.ApplicationCommandData().Name)).
 		With("input", input).
 		With(util.InteractionGroup(i))
 
@@ -82,7 +83,7 @@ func (c *AddMovie) Handler(s *discordgo.Session, i *discordgo.InteractionCreate)
 	})
 	if err != nil {
 		l.Error("failed to respond to interaction", slog.Any("err", err))
+	} else {
+		l.Info("successfully responded to command", slog.String("movie_title", movie.Title))
 	}
-
-	l.Info("successfully responded to command", slog.String("movie_title", movie.Title))
 }

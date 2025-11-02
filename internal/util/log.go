@@ -10,7 +10,6 @@ import (
 func InteractionGroup(i *discordgo.InteractionCreate) slog.Attr {
 	return slog.Group("interaction",
 		slog.String("id", i.ID),
-		slog.String("command", i.ApplicationCommandData().Name),
 		slog.String("username", i.Member.User.Username),
 		slog.String("global_name", i.Member.User.GlobalName),
 		slog.String("guild_id", i.GuildID),
