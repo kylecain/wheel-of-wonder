@@ -11,12 +11,14 @@ import (
 )
 
 type WatchedMovies struct {
-	MovieRepository *repository.Movie
+	movieRepository *repository.Movie
+	logger          *slog.Logger
 }
 
-func NewWatchedMovies(movieRepository *repository.Movie) *WatchedMovies {
+func NewWatchedMovies(movieRepository *repository.Movie, logger *slog.Logger) *WatchedMovies {
 	return &WatchedMovies{
-		MovieRepository: movieRepository,
+		movieRepository: movieRepository,
+		logger:          logger,
 	}
 }
 
@@ -28,11 +30,19 @@ func (c *WatchedMovies) ApplicationCommand() *discordgo.ApplicationCommand {
 }
 
 func (c *WatchedMovies) Handler(s *discordgo.Session, i *discordgo.InteractionCreate) {
-	movies, err := c.MovieRepository.GetAllWatched(i.GuildID)
+	l := c.logger.
+		With(slog.String("command_name", i.ApplicationCommandData().Name)).
+		With(util.InteractionGroup(i))
+	l.Info("received command interaction")
+
+	movies, err := c.movieRepository.GetAllWatched(i.GuildID)
 	if err != nil {
-		util.InteractionResponseError(s, i, err, "Failed to get watched movies.")
+		l.Error("failed to get all watched movies", slog.Any("err", err))
+		util.RespondError(s, i, "Something went wrong getting watched movie data.")
 		return
 	}
+
+	l.Info("got all watched movies from the database", slog.Int("watched_movie_count", len(movies)))
 
 	var b strings.Builder
 	for _, movie := range movies {
@@ -56,6 +66,8 @@ func (c *WatchedMovies) Handler(s *discordgo.Session, i *discordgo.InteractionCr
 		},
 	})
 	if err != nil {
-		slog.Error("Failed to respond to watched movies command", "error", err)
+		l.Error("failed to respond to interaction", slog.Any("err", err))
+	} else {
+		l.Info("successfully responded to command", slog.Int("movie_count", len(movies)))
 	}
 }
