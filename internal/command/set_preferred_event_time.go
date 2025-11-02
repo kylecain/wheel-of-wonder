@@ -6,15 +6,18 @@ import (
 	"github.com/bwmarrin/discordgo"
 	"github.com/kylecain/wheel-of-wonder/internal/component"
 	"github.com/kylecain/wheel-of-wonder/internal/db/repository"
+	"github.com/kylecain/wheel-of-wonder/internal/util"
 )
 
 type SetPreferredEventTime struct {
-	UserRepository *repository.User
+	userRepository *repository.User
+	logger         *slog.Logger
 }
 
-func NewSetPreferredEventTime(userRepository *repository.User) *SetPreferredEventTime {
+func NewSetPreferredEventTime(userRepository *repository.User, logger *slog.Logger) *SetPreferredEventTime {
 	return &SetPreferredEventTime{
-		UserRepository: userRepository,
+		userRepository: userRepository,
+		logger:         logger,
 	}
 }
 
@@ -26,6 +29,12 @@ func (c *SetPreferredEventTime) ApplicationCommand() *discordgo.ApplicationComma
 }
 
 func (c *SetPreferredEventTime) Handler(s *discordgo.Session, i *discordgo.InteractionCreate) {
+	l := c.logger.
+		With(slog.String("command_name", i.ApplicationCommandData().Name)).
+		With(util.InteractionGroup(i))
+
+	l.Info("received command interaction")
+
 	err := s.InteractionRespond(i.Interaction, &discordgo.InteractionResponse{
 		Type: discordgo.InteractionResponseModal,
 		Data: &discordgo.InteractionResponseData{
@@ -36,6 +45,8 @@ func (c *SetPreferredEventTime) Handler(s *discordgo.Session, i *discordgo.Inter
 		},
 	})
 	if err != nil {
-		slog.Error("Failed to respond to set-preferred-event-time command", "error", err)
+		l.Error("failed to respond to interaction", slog.Any("err", err))
+	} else {
+		l.Info("successfully responded to command")
 	}
 }
