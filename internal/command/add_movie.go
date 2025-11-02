@@ -11,14 +11,16 @@ import (
 )
 
 type AddMovie struct {
-	MovieRepository *repository.Movie
-	MovieService    *service.Movie
+	movieRepository *repository.Movie
+	movieService    *service.Movie
+	logger          *slog.Logger
 }
 
-func NewAddMovie(movieRepository *repository.Movie, movieService *service.Movie) *AddMovie {
+func NewAddMovie(movieRepository *repository.Movie, movieService *service.Movie, logger *slog.Logger) *AddMovie {
 	return &AddMovie{
-		MovieRepository: movieRepository,
-		MovieService:    movieService,
+		movieRepository: movieRepository,
+		movieService:    movieService,
+		logger:          logger,
 	}
 }
 
@@ -39,12 +41,20 @@ func (c *AddMovie) ApplicationCommand() *discordgo.ApplicationCommand {
 
 func (c *AddMovie) Handler(s *discordgo.Session, i *discordgo.InteractionCreate) {
 	input := i.ApplicationCommandData().Options[0].StringValue()
+	l := c.logger.
+		With("input", input).
+		With(util.InteractionGroup(i))
 
-	movieInfo, err := c.MovieService.FetchMovie(input)
+	l.Info("received command interaction")
+
+	movieInfo, err := c.movieService.FetchMovie(input)
 	if err != nil {
-		util.InteractionResponseError(s, i, err, "Failed to fetch movie info.")
+		l.Error("failed to fetch movie data", slog.Any("err", err))
+		util.RespondError(s, i, "Something went wrong fetching movie data.")
 		return
 	}
+
+	l.Info("fetched movie info", util.MovieInfoGroup(movieInfo))
 
 	movie := &model.Movie{
 		GuildID:     i.GuildID,
@@ -56,9 +66,10 @@ func (c *AddMovie) Handler(s *discordgo.Session, i *discordgo.InteractionCreate)
 		ContentURL:  movieInfo.ContentURL,
 	}
 
-	_, err = c.MovieRepository.AddMovie(movie)
+	_, err = c.movieRepository.AddMovie(movie)
 	if err != nil {
-		util.InteractionResponseError(s, i, err, "Failed to add movie.")
+		l.Error("failed to add movie to database", slog.Any("err", err))
+		util.RespondError(s, i, "Something went wrong adding movie.")
 		return
 	}
 
@@ -70,6 +81,8 @@ func (c *AddMovie) Handler(s *discordgo.Session, i *discordgo.InteractionCreate)
 		},
 	})
 	if err != nil {
-		slog.Error("Failed to respond to add-movie command", "error", err)
+		l.Error("failed to respond to interaction", slog.Any("err", err))
 	}
+
+	l.Info("successfully responded to command", slog.String("movie_title", movie.Title))
 }

@@ -28,7 +28,7 @@ func (c *ActiveMovie) ApplicationCommand() *discordgo.ApplicationCommand {
 }
 
 func (c *ActiveMovie) Handler(s *discordgo.Session, i *discordgo.InteractionCreate) {
-	l := util.WithInteractionLogger(c.logger, i)
+	l := c.logger.With(util.InteractionGroup(i))
 	l.Info("received command interaction")
 
 	activeMovie, err := c.movieRepository.GetActive(i.GuildID)
@@ -42,8 +42,6 @@ func (c *ActiveMovie) Handler(s *discordgo.Session, i *discordgo.InteractionCrea
 		return
 	}
 
-	l.Info("responding with active movie", slog.String("movie_title", activeMovie.Title))
-
 	err = s.InteractionRespond(i.Interaction, &discordgo.InteractionResponse{
 		Type: discordgo.InteractionResponseChannelMessageWithSource,
 		Data: &discordgo.InteractionResponseData{
@@ -54,4 +52,6 @@ func (c *ActiveMovie) Handler(s *discordgo.Session, i *discordgo.InteractionCrea
 	if err != nil {
 		l.Error("failed to respond to interaction", slog.Any("err", err))
 	}
+
+	l.Info("successfully responded to command", util.MovieGroup(activeMovie))
 }

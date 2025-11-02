@@ -25,7 +25,7 @@ func RegisterAll(
 	logger *slog.Logger,
 ) {
 	commands[commandNameActiveMovie] = NewActiveMovie(movieRepository, logger)
-	commands[commandNameAddMovie] = NewAddMovie(movieRepository, movieSearchService)
+	commands[commandNameAddMovie] = NewAddMovie(movieRepository, movieSearchService, logger)
 	commands[commandNameAllMovies] = NewAllMovies(movieRepository)
 	commands[commandNameDeleteMovie] = NewDeleteMovie(movieRepository)
 	commands[commandNameSetPreferredEventTime] = NewSetPreferredEventTime(userRepository)
