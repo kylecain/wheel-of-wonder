@@ -33,7 +33,7 @@ func NewBot(config *config.Config, db *sql.DB, httpClient *http.Client, logger *
 		config:     config,
 		db:         db,
 		httpClient: httpClient,
-		logger:     logger.With(slog.String("component", "bot")),
+		logger:     logger,
 	}, nil
 }
 
@@ -48,8 +48,7 @@ func (b *Bot) Start() error {
 
 	movieService := service.NewMovie(b.httpClient, b.logger)
 
-	// commandLogger := b.logger.With(slog.String("component", "command"))
-	command.RegisterAll(b.session, b.config, movieRepository, userRepository, movieService)
+	command.RegisterAll(b.session, b.config, movieRepository, userRepository, movieService, b.logger)
 	// componentLogger := b.logger.With(slog.String("component", "component"))
 	component.RegisterAll(b.session, movieRepository, userRepository, movieService)
 

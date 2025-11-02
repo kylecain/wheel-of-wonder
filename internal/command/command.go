@@ -1,6 +1,8 @@
 package command
 
 import (
+	"log/slog"
+
 	"github.com/bwmarrin/discordgo"
 	"github.com/kylecain/wheel-of-wonder/internal/config"
 	"github.com/kylecain/wheel-of-wonder/internal/db/repository"
@@ -20,8 +22,9 @@ func RegisterAll(
 	movieRepository *repository.Movie,
 	userRepository *repository.User,
 	movieSearchService *service.Movie,
+	logger *slog.Logger,
 ) {
-	commands[commandNameActiveMovie] = NewActiveMovie(movieRepository)
+	commands[commandNameActiveMovie] = NewActiveMovie(movieRepository, logger)
 	commands[commandNameAddMovie] = NewAddMovie(movieRepository, movieSearchService)
 	commands[commandNameAllMovies] = NewAllMovies(movieRepository)
 	commands[commandNameDeleteMovie] = NewDeleteMovie(movieRepository)

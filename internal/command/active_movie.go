@@ -9,12 +9,14 @@ import (
 )
 
 type ActiveMovie struct {
-	MovieRepository *repository.Movie
+	movieRepository *repository.Movie
+	logger          *slog.Logger
 }
 
-func NewActiveMovie(movieRepository *repository.Movie) *ActiveMovie {
+func NewActiveMovie(movieRepository *repository.Movie, logger *slog.Logger) *ActiveMovie {
 	return &ActiveMovie{
-		MovieRepository: movieRepository,
+		movieRepository: movieRepository,
+		logger:          logger,
 	}
 }
 
@@ -26,11 +28,21 @@ func (c *ActiveMovie) ApplicationCommand() *discordgo.ApplicationCommand {
 }
 
 func (c *ActiveMovie) Handler(s *discordgo.Session, i *discordgo.InteractionCreate) {
-	activeMovie, err := c.MovieRepository.GetActive(i.GuildID)
-	if err != nil || activeMovie == nil {
-		util.InteractionResponseError(s, i, err, "Failed to retrieve active movie.")
+	l := util.WithInteractionLogger(c.logger, i)
+	l.Info("received command interaction")
+
+	activeMovie, err := c.movieRepository.GetActive(i.GuildID)
+	if err != nil {
+		l.Error("failed to get active movie", slog.Any("err", err))
+		util.RespondError(s, i, "Something went wrong fetching the active movie.")
+		return
+	} else if activeMovie == nil {
+		l.Warn("no active movie found")
+		util.RespondError(s, i, "No active movie found.")
 		return
 	}
+
+	l.Info("responding with active movie", slog.String("movie_title", activeMovie.Title))
 
 	err = s.InteractionRespond(i.Interaction, &discordgo.InteractionResponse{
 		Type: discordgo.InteractionResponseChannelMessageWithSource,
@@ -40,6 +52,6 @@ func (c *ActiveMovie) Handler(s *discordgo.Session, i *discordgo.InteractionCrea
 		},
 	})
 	if err != nil {
-		slog.Error("Failed to respond to add command", "error", err)
+		l.Error("failed to respond to interaction", slog.Any("err", err))
 	}
 }
