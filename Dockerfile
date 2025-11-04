@@ -1,4 +1,4 @@
-FROM --platform=linux/amd64 docker.io/library/golang:1.24.4-alpine AS builder
+FROM --platform=linux/amd64 docker.io/library/golang:1.25.3-alpine AS builder
 
 RUN apk add --no-cache musl-dev gcc sqlite-dev
 
