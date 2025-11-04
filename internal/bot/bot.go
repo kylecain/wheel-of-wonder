@@ -49,8 +49,7 @@ func (b *Bot) Start() error {
 	movieService := service.NewMovie(b.httpClient, b.logger)
 
 	command.RegisterAll(b.session, b.config, movieRepository, userRepository, movieService, b.logger)
-	// componentLogger := b.logger.With(slog.String("component", "component"))
-	component.RegisterAll(b.session, movieRepository, userRepository, movieService)
+	component.RegisterAll(b.session, movieRepository, userRepository, movieService, b.logger)
 
 	return nil
 }

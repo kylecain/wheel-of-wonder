@@ -1,6 +1,7 @@
 package component
 
 import (
+	"log/slog"
 	"strings"
 
 	"github.com/bwmarrin/discordgo"
@@ -19,8 +20,9 @@ func RegisterAll(
 	movieRepository *repository.Movie,
 	userRepository *repository.User,
 	movieService *service.Movie,
+	logger *slog.Logger,
 ) {
-	components[CustomIDSetPreferredTimeModal] = NewSetPreferredEventTime(userRepository)
+	components[CustomIDSetPreferredTimeModal] = NewSetPreferredEventTime(userRepository, logger)
 	components[CustomIdAnnounceMovie] = NewAnnounceMovie(movieRepository)
 	components[CustomIdCreateEventModal] = NewEventDetails(movieRepository, movieService)
 	components[CustomIdCreateEventPreferredTime] = NewCreateEventPreferredTime(movieRepository, userRepository, movieService)

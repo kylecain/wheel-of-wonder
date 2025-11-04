@@ -23,12 +23,13 @@ var dayOfWeekMap = map[string]int{
 }
 
 type SetPreferredEventTime struct {
-	UserRepository *repository.User
+	userRepository *repository.User
+	logger         *slog.Logger
 }
 
-func NewSetPreferredEventTime(userRepository *repository.User) *SetPreferredEventTime {
+func NewSetPreferredEventTime(userRepository *repository.User, logger *slog.Logger) *SetPreferredEventTime {
 	return &SetPreferredEventTime{
-		UserRepository: userRepository,
+		userRepository: userRepository,
 	}
 }
 
@@ -77,6 +78,11 @@ func SetPreferredEventTimeModal() []discordgo.MessageComponent {
 }
 
 func (c *SetPreferredEventTime) Handler(s *discordgo.Session, i *discordgo.InteractionCreate) {
+	l := c.logger.
+		With(slog.String("component", CustomIDSetPreferredTimeModal)).
+		With(util.InteractionGroup(i))
+	l.Info("received modal submit interaction")
+
 	data := i.ModalSubmitData()
 
 	dayOfWeekInput := data.Components[0].(*discordgo.ActionsRow).Components[0].(*discordgo.TextInput).Value
@@ -88,18 +94,21 @@ func (c *SetPreferredEventTime) Handler(s *discordgo.Session, i *discordgo.Inter
 	_, ok := dayOfWeekMap[dayOfWeekInputLower]
 
 	if !ok {
+		l.Warn("invalid day provided", slog.String("day_input", dayOfWeekInput), slog.String("day_input_normalized", dayOfWeekInputLower))
 		util.InteractionResponseError(s, i, fmt.Errorf("invalid day"), "Invalid day")
 		return
 	}
 
 	_, err := time.Parse("15:04", timeInput)
 	if err != nil {
+		l.Warn("invalid time provided", slog.String("time_input", timeInput), slog.Any("err", err))
 		util.InteractionResponseError(s, i, err, "Invalid time provided.")
 		return
 	}
 
 	_, err = time.LoadLocation(timezoneInput)
 	if err != nil {
+		l.Warn("invalid timezone provided", slog.String("timezone_input", timezoneInput), slog.Any("err", err))
 		util.InteractionResponseError(s, i, err, "Invalid timezone provided.")
 		return
 	}
@@ -112,8 +121,9 @@ func (c *SetPreferredEventTime) Handler(s *discordgo.Session, i *discordgo.Inter
 		PreferredTimezone:  timezoneInput,
 	}
 
-	_, err = c.UserRepository.AddUser(user)
+	_, err = c.userRepository.AddUser(user)
 	if err != nil {
+		l.Error("error saving settings", slog.Any("err", err), slog.String("user_id", user.UserID))
 		util.InteractionResponseError(s, i, err, "Error saving settings")
 		return
 	}
@@ -126,6 +136,8 @@ func (c *SetPreferredEventTime) Handler(s *discordgo.Session, i *discordgo.Inter
 		},
 	})
 	if err != nil {
-		slog.Error("Failed to respond to saving preferred event time", "error", err)
+		l.Error("failed to respond to interaction", slog.Any("err", err))
+	} else {
+		l.Info("successfully responded to interaction")
 	}
 }
