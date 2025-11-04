@@ -49,7 +49,7 @@ func (c *DeleteMovie) Handler(s *discordgo.Session, i *discordgo.InteractionCrea
 		Type: discordgo.InteractionResponseChannelMessageWithSource,
 		Data: &discordgo.InteractionResponseData{
 			Content:    "Pick one of the options below:",
-			Components: component.MovieSelectMenu(movies, component.CustomIdDeleteMovie, i),
+			Components: util.MovieSelectMenu(movies, component.CustomIdDeleteMovie, i),
 			Flags:      discordgo.MessageFlagsEphemeral,
 		},
 	})

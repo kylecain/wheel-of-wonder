@@ -28,6 +28,7 @@ func RegisterAll(
 	components[CustomIdCreateEventPreferredTime] = NewCreateEventPreferredTime(movieRepository, userRepository, movieService)
 	components[CustomIdCreateEvent] = NewCreateEvent(movieRepository)
 	components[CustomIdDeleteMovie] = NewDeleteMovie(movieRepository)
+	components[CustomIdBonusMovieModal] = NewBonusMovie(movieService, logger)
 
 	s.AddHandler(func(s *discordgo.Session, i *discordgo.InteractionCreate) {
 		var customId string

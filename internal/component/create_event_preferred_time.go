@@ -66,7 +66,7 @@ func (c *CreateEventPreferredTime) Handler(s *discordgo.Session, i *discordgo.In
 		slog.Error("Failed to fetch and encode image", "error", err)
 	}
 
-	err = util.ScheduleEvent(selectedMovie, imageData, *startTime, *endTime, s, i)
+	err = util.ScheduleEvent(selectedMovie.Title, selectedMovie.Description, imageData, *startTime, *endTime, s, i)
 	if err != nil {
 		slog.Error("Failed to schedule and notify for event", "error", err)
 	}

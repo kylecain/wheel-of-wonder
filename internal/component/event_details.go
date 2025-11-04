@@ -25,50 +25,6 @@ func NewEventDetails(movieRepository *repository.Movie, movieService *service.Mo
 	}
 }
 
-func EventDetailsModal() []discordgo.MessageComponent {
-	return []discordgo.MessageComponent{
-		discordgo.ActionsRow{
-			Components: []discordgo.MessageComponent{
-				discordgo.TextInput{
-					CustomID:    "date",
-					Label:       "Enter the date of the event",
-					Style:       discordgo.TextInputShort,
-					Placeholder: "YYYY-MM-DD",
-					Required:    true,
-					MaxLength:   10,
-					MinLength:   10,
-				},
-			},
-		},
-		discordgo.ActionsRow{
-			Components: []discordgo.MessageComponent{
-				discordgo.TextInput{
-					CustomID:    "time",
-					Label:       "Enter the time of the event (24-hour format)",
-					Style:       discordgo.TextInputShort,
-					Placeholder: "HH:mm",
-					Required:    true,
-					MaxLength:   5,
-					MinLength:   5,
-				},
-			},
-		},
-		discordgo.ActionsRow{
-			Components: []discordgo.MessageComponent{
-				discordgo.TextInput{
-					CustomID:    "timezone",
-					Label:       "Enter the timezone of the event",
-					Style:       discordgo.TextInputShort,
-					Placeholder: "America/Chicago",
-					Required:    true,
-					MaxLength:   50,
-					MinLength:   8,
-				},
-			},
-		},
-	}
-}
-
 func (c *EventDetails) Handler(s *discordgo.Session, i *discordgo.InteractionCreate) {
 	data := i.ModalSubmitData()
 	customId := data.CustomID
@@ -112,7 +68,7 @@ func (c *EventDetails) Handler(s *discordgo.Session, i *discordgo.InteractionCre
 		slog.Error("Failed to fetch and encode image", "error", err)
 	}
 
-	err = util.ScheduleEvent(selectedMovie, imageData, startTime, endTime, s, i)
+	err = util.ScheduleEvent(selectedMovie.Title, selectedMovie.Description, imageData, startTime, endTime, s, i)
 	if err != nil {
 		slog.Error("Failed to schedule and notify for event", "error", err)
 	}
