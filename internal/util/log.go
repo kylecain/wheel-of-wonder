@@ -39,6 +39,7 @@ func MovieInfoGroup(m *model.MovieInfo) slog.Attr {
 		slog.String("description", m.Description),
 		slog.String("image_url", m.ImageURL),
 		slog.String("content_url", m.ContentURL),
+		slog.String("duration", m.Duration),
 	)
 }
 

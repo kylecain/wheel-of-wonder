@@ -1,6 +1,7 @@
 package service
 
 import (
+	"bytes"
 	"encoding/base64"
 	"encoding/json"
 	"fmt"
@@ -33,6 +34,16 @@ type wikipediaSummaryResponse struct {
 			Page string `json:"page"`
 		} `json:"desktop"`
 	} `json:"content_urls"`
+}
+
+type wikidataQueryResponse struct {
+	Results struct {
+		Bindings []struct {
+			Duration struct {
+				Value string `json:"value"`
+			} `json:"duration"`
+		} `json:"bindings"`
+	} `json:"results"`
 }
 
 type Movie struct {
@@ -112,11 +123,17 @@ func (s *Movie) FetchMovie(title string) (*model.MovieInfo, error) {
 		return nil, fmt.Errorf("failed to parse json: %w", err)
 	}
 
+	duration, err := s.QueryWikidata(summaryData.Title)
+	if err != nil {
+		return nil, fmt.Errorf("failed to query wikidata: %w", err)
+	}
+
 	return &model.MovieInfo{
 		Title:       summaryData.Title,
 		Description: summaryData.Extract,
 		ImageURL:    summaryData.Thumbnail.Source,
 		ContentURL:  summaryData.ContentUrls.Desktop.Page,
+		Duration:    duration,
 	}, nil
 }
 
@@ -145,4 +162,55 @@ func (s *Movie) FetchImageAndEncode(url string) (string, error) {
 
 	encoded := base64.StdEncoding.EncodeToString(imageBytes)
 	return fmt.Sprintf("data:%s;base64,%s", resp.Header.Get("Content-Type"), encoded), nil
+}
+
+func (s Movie) QueryWikidata(movieTitle string) (string, error) {
+	const endpoint = "https://query.wikidata.org/sparql"
+
+	query := fmt.Sprintf(
+		`SELECT ?duration WHERE {
+			?article schema:about ?item ;
+				schema:isPartOf <https://en.wikipedia.org/> ;
+				schema:name "%s"@en .
+  
+			OPTIONAL {
+				?item wdt:P2047 ?duration .
+			} 
+		}`,
+		movieTitle,
+	)
+
+	form := url.Values{}
+	form.Set("query", query)
+	form.Set("format", "json")
+
+	req, err := http.NewRequest("POST", endpoint, bytes.NewBufferString(form.Encode()))
+	if err != nil {
+		return "", fmt.Errorf("failed to create request: %w", err)
+	}
+
+	req.Header.Set("Content-Type", "application/x-www-form-urlencoded")
+	req.Header.Set("User-Agent", "wheel-of-wonder (+https://github.com/kylecain/wheel-of-wonder)")
+
+	resp, err := s.client.Do(req)
+	if err != nil {
+		return "", fmt.Errorf("failed to make request: %w", err)
+	}
+	defer resp.Body.Close()
+
+	if resp.StatusCode != http.StatusOK {
+		body, _ := io.ReadAll(resp.Body)
+		return "", fmt.Errorf("SPARQL query failed: %s\n%s", resp.Status, string(body))
+	}
+
+	var result wikidataQueryResponse
+	if err := json.NewDecoder(resp.Body).Decode(&result); err != nil {
+		return "", fmt.Errorf("failed to decode JSON: %w", err)
+	}
+
+	if len(result.Results.Bindings) == 0 {
+		return "", fmt.Errorf("no duration found for %s", movieTitle)
+	}
+
+	return result.Results.Bindings[0].Duration.Value, nil
 }
