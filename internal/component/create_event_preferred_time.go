@@ -55,7 +55,14 @@ func (c *CreateEventPreferredTime) Handler(s *discordgo.Session, i *discordgo.In
 		return
 	}
 
-	startTime, endTime, err := c.getEventStartAndEndTime(i)
+	minutes, err := strconv.Atoi(selectedMovie.Duration)
+	if err != nil {
+		slog.Error("failed to convert duration", slog.String("duration", selectedMovie.Duration), slog.Any("err", err))
+	}
+
+	duration := time.Duration(minutes) * time.Minute
+
+	startTime, endTime, err := c.getEventStartAndEndTime(duration, i)
 	if err != nil {
 		util.InteractionResponseError(s, i, err, "Failed to get event start and end time")
 		return
@@ -91,7 +98,7 @@ func nextPreferredEventTime(now time.Time, preferredDay string, preferredTime ti
 	return target
 }
 
-func (c *CreateEventPreferredTime) getEventStartAndEndTime(i *discordgo.InteractionCreate) (*time.Time, *time.Time, error) {
+func (c *CreateEventPreferredTime) getEventStartAndEndTime(duration time.Duration, i *discordgo.InteractionCreate) (*time.Time, *time.Time, error) {
 
 	user, err := c.UserRepository.UserByUserId(i.Member.User.ID)
 	if err != nil {
@@ -110,7 +117,7 @@ func (c *CreateEventPreferredTime) getEventStartAndEndTime(i *discordgo.Interact
 
 	now := time.Now().In(loc)
 	startTime := nextPreferredEventTime(now, user.PreferredDayOfWeek, parsedTime, loc)
-	endTime := startTime.Add(EventDuration)
+	endTime := startTime.Add(duration)
 
 	return &startTime, &endTime, nil
 }

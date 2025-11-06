@@ -1,0 +1,1 @@
+ALTER TABLE movies ADD COLUMN duration TEXT DEFAULT '';

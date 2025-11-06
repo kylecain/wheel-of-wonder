@@ -9,6 +9,7 @@ type Movie struct {
 	Username    string
 	Title       string
 	Description string
+	Duration    string
 	ImageURL    string
 	ContentURL  string
 	Watched     bool

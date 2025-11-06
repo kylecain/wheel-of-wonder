@@ -63,6 +63,7 @@ func (c *AddMovie) Handler(s *discordgo.Session, i *discordgo.InteractionCreate)
 		Username:    i.Member.User.Username,
 		Title:       movieInfo.Title,
 		Description: movieInfo.Description,
+		Duration:    movieInfo.Duration,
 		ImageURL:    movieInfo.ImageURL,
 		ContentURL:  movieInfo.ContentURL,
 	}

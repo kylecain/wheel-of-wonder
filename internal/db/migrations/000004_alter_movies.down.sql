@@ -1,0 +1,1 @@
+ALTER TABLE movies DROP COLUMN duration TEXT;

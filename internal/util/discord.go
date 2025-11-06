@@ -93,6 +93,8 @@ func ScheduleEvent(movieTitle, movieDescription, imageData string, startTime tim
 		description = movieDescription[:maxEventDescriptionLength]
 	}
 
+	fmt.Println(startTime, endTime)
+
 	scheduledEvent, err := s.GuildScheduledEventCreate(i.GuildID, &discordgo.GuildScheduledEventParams{
 		Name:               name,
 		Description:        description,
