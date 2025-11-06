@@ -35,6 +35,7 @@ func scanMovie(s scanner) (*model.Movie, error) {
 		&m.Username,
 		&m.Title,
 		&m.Description,
+		&m.Duration,
 		&m.ImageURL,
 		&m.ContentURL,
 		&m.CreatedAt,
