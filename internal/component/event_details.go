@@ -61,13 +61,7 @@ func (c *EventDetails) Handler(s *discordgo.Session, i *discordgo.InteractionCre
 		return
 	}
 
-	minutes, err := strconv.Atoi(selectedMovie.Duration)
-	if err != nil {
-		slog.Error("failed to convert duration", slog.String("duration", selectedMovie.Duration), slog.Any("err", err))
-		util.InteractionResponseError(s, i, err, "Failed to create end time.")
-	}
-
-	endTime := startTime.Add(time.Duration(minutes) * time.Minute)
+	endTime := startTime.Add(time.Duration(selectedMovie.Duration) * time.Minute)
 
 	imageData, err := c.MovieService.FetchImageAndEncode(selectedMovie.ImageURL)
 	if err != nil {

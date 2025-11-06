@@ -9,6 +9,7 @@ import (
 	"log/slog"
 	"net/http"
 	"net/url"
+	"strconv"
 	"strings"
 
 	"github.com/kylecain/wheel-of-wonder/internal/model"
@@ -164,7 +165,7 @@ func (s *Movie) FetchImageAndEncode(url string) (string, error) {
 	return fmt.Sprintf("data:%s;base64,%s", resp.Header.Get("Content-Type"), encoded), nil
 }
 
-func (s Movie) QueryWikidata(movieTitle string) (string, error) {
+func (s Movie) QueryWikidata(movieTitle string) (int, error) {
 	const endpoint = "https://query.wikidata.org/sparql"
 
 	query := fmt.Sprintf(
@@ -186,7 +187,7 @@ func (s Movie) QueryWikidata(movieTitle string) (string, error) {
 
 	req, err := http.NewRequest("POST", endpoint, bytes.NewBufferString(form.Encode()))
 	if err != nil {
-		return "", fmt.Errorf("failed to create request: %w", err)
+		return 0, fmt.Errorf("failed to create request: %w", err)
 	}
 
 	req.Header.Set("Content-Type", "application/x-www-form-urlencoded")
@@ -194,23 +195,24 @@ func (s Movie) QueryWikidata(movieTitle string) (string, error) {
 
 	resp, err := s.client.Do(req)
 	if err != nil {
-		return "", fmt.Errorf("failed to make request: %w", err)
+		return 0, fmt.Errorf("failed to make request: %w", err)
 	}
 	defer resp.Body.Close()
 
 	if resp.StatusCode != http.StatusOK {
 		body, _ := io.ReadAll(resp.Body)
-		return "", fmt.Errorf("SPARQL query failed: %s\n%s", resp.Status, string(body))
+		return 0, fmt.Errorf("SPARQL query failed: %s\n%s", resp.Status, string(body))
 	}
 
 	var result wikidataQueryResponse
 	if err := json.NewDecoder(resp.Body).Decode(&result); err != nil {
-		return "", fmt.Errorf("failed to decode JSON: %w", err)
+		return 0, fmt.Errorf("failed to decode JSON: %w", err)
 	}
 
 	if len(result.Results.Bindings) == 0 {
-		return "", fmt.Errorf("no duration found for %s", movieTitle)
+		return 0, fmt.Errorf("no duration found for %s", movieTitle)
 	}
 
-	return result.Results.Bindings[0].Duration.Value, nil
+	durationStr := result.Results.Bindings[0].Duration.Value
+	return strconv.Atoi(durationStr)
 }

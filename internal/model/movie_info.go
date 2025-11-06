@@ -5,5 +5,5 @@ type MovieInfo struct {
 	Description string
 	ImageURL    string
 	ContentURL  string
-	Duration    string
+	Duration    int
 }

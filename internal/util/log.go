@@ -24,6 +24,7 @@ func MovieGroup(m *model.Movie) slog.Attr {
 		slog.String("username", m.Username),
 		slog.String("title", m.Title),
 		slog.String("description", m.Description),
+		slog.Int("duration", m.Duration),
 		slog.String("image_url", m.ImageURL),
 		slog.String("content_url", m.ContentURL),
 		slog.Bool("watched", m.Watched),
@@ -39,7 +40,7 @@ func MovieInfoGroup(m *model.MovieInfo) slog.Attr {
 		slog.String("description", m.Description),
 		slog.String("image_url", m.ImageURL),
 		slog.String("content_url", m.ContentURL),
-		slog.String("duration", m.Duration),
+		slog.Int("duration", m.Duration),
 	)
 }
 

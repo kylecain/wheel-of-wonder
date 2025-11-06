@@ -3,7 +3,6 @@ package component
 import (
 	"fmt"
 	"log/slog"
-	"strconv"
 	"time"
 
 	"github.com/bwmarrin/discordgo"
@@ -62,13 +61,7 @@ func (c *BonusMovie) Handler(s *discordgo.Session, i *discordgo.InteractionCreat
 		util.InteractionResponseError(s, i, err, "Failed to encode movie image.")
 	}
 
-	minutes, err := strconv.Atoi(movieData.Duration)
-	if err != nil {
-		l.Error("failed to convert duration", slog.String("duration", movieData.Duration), slog.Any("err", err))
-		util.InteractionResponseError(s, i, err, "Failed to create end time.")
-	}
-
-	endTime := startTime.Add(time.Duration(minutes) * time.Minute)
+	endTime := startTime.Add(time.Duration(movieData.Duration) * time.Minute)
 
 	err = util.ScheduleEvent(movieData.Title, movieData.Description, imageData, startTime, endTime, s, i)
 	if err != nil {

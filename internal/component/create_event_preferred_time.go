@@ -55,12 +55,7 @@ func (c *CreateEventPreferredTime) Handler(s *discordgo.Session, i *discordgo.In
 		return
 	}
 
-	minutes, err := strconv.Atoi(selectedMovie.Duration)
-	if err != nil {
-		slog.Error("failed to convert duration", slog.String("duration", selectedMovie.Duration), slog.Any("err", err))
-	}
-
-	duration := time.Duration(minutes) * time.Minute
+	duration := time.Duration(selectedMovie.Duration) * time.Minute
 
 	startTime, endTime, err := c.getEventStartAndEndTime(duration, i)
 	if err != nil {

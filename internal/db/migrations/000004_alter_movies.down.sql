@@ -1,1 +1,1 @@
-ALTER TABLE movies DROP COLUMN duration TEXT;
+ALTER TABLE movies DROP COLUMN duration INTEGER;
