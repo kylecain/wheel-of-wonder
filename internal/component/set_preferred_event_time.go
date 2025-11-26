@@ -30,6 +30,7 @@ type SetPreferredEventTime struct {
 func NewSetPreferredEventTime(userRepository *repository.User, logger *slog.Logger) *SetPreferredEventTime {
 	return &SetPreferredEventTime{
 		userRepository: userRepository,
+		logger:         logger,
 	}
 }
 

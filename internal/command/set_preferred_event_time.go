@@ -48,5 +48,6 @@ func (c *SetPreferredEventTime) Handler(s *discordgo.Session, i *discordgo.Inter
 		l.Error("failed to respond to interaction", slog.Any("err", err))
 	} else {
 		l.Info("successfully responded to command")
+		l.Error("failed to respond to interation")
 	}
 }
